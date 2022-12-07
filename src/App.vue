@@ -1,6 +1,6 @@
 <template>
   <n-config-provider :theme="useDarkTheme === true ? darkTheme : null">
-    <n-button @click="useDarkTheme = !useDarkTheme"> 切换主题 </n-button>
+    <!-- <n-button @click="useDarkTheme = !useDarkTheme"> 切换主题 </n-button> -->
     <router-view />
     <n-global-style />
   </n-config-provider>
