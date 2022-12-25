@@ -17,7 +17,7 @@
           <div class="tabs-item-text">手机登录</div>
         </div>
       </n-el>
-      <n-form v-if="loginMethod === 0" :model="accountForm" class="form">
+      <n-form v-show="loginMethod === 0" :model="accountForm" class="form">
         <n-form-item :show-label="false">
           <n-input
             v-model="accountForm.account"
@@ -48,7 +48,7 @@
           </n-button>
         </n-form-item>
       </n-form>
-      <n-form v-if="loginMethod === 1" :model="phoneForm" class="form">
+      <n-form v-show="loginMethod === 1" :model="phoneForm" class="form">
         <n-form-item :show-label="false">
           <n-input
             v-model="phoneForm.phone"
