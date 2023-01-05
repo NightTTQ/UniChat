@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vicons/antd": "^0.12.0",
+    "@vicons/utils": "^0.1.4",
     "pinia": "^2.0.27",
     "vue": "^3.2.41",
     "vue-router": "^4.1.6"
