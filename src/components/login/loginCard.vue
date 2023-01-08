@@ -20,7 +20,7 @@
       <n-form v-show="loginMethod === 0" :model="accountForm" class="form">
         <n-form-item :show-label="false">
           <n-input
-            v-model="accountForm.account"
+            v-model:value="accountForm.account"
             placeholder="输入邮箱/账号名"
             :maxlength="30"
             size="large"
@@ -29,7 +29,7 @@
         </n-form-item>
         <n-form-item :show-label="false">
           <n-input
-            v-model="accountForm.password"
+            v-model:value="accountForm.password"
             placeholder="请输入登录密码"
             show-password-on="mousedown"
             :maxlength="30"
@@ -41,8 +41,9 @@
           <n-button
             type="primary"
             @click="login"
+            :loading="isLoading"
             size="large"
-            native-type="submit"
+            attr-type="submit"
           >
             登录
           </n-button>
@@ -51,7 +52,7 @@
       <n-form v-show="loginMethod === 1" :model="phoneForm" class="form">
         <n-form-item :show-label="false">
           <n-input
-            v-model="phoneForm.phone"
+            v-model:value="phoneForm.phone"
             placeholder="输入手机号"
             :maxlength="20"
             size="large"
@@ -61,7 +62,7 @@
         <n-form-item :show-label="false">
           <n-input-group>
             <n-input
-              v-model="phoneForm.code"
+              v-model:value="phoneForm.code"
               placeholder="请输入验证码"
               :maxlength="6"
               size="large"
@@ -80,8 +81,9 @@
           <n-button
             type="primary"
             @click="login"
+            :loading="isLoading"
             size="large"
-            native-type="submit"
+            attr-type="submit"
           >
             登录
           </n-button>
@@ -96,14 +98,46 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { useNotification } from "naive-ui";
+import userService from "@/services/userService";
+import { useUserStore } from "@/stores";
 
 const loginMethod = ref(0);
+const isLoading = ref(false);
 const accountForm = ref({ account: "", password: "" });
 const phoneForm = ref({ phone: "", code: "" });
+const notification = useNotification();
+const userStore = useUserStore();
 
-const login = () => {
-  if (loginMethod.value === 0) console.log("account");
-  if (loginMethod.value === 1) console.log("phone");
+const login = async () => {
+  isLoading.value = true;
+  try {
+    if (loginMethod.value === 0) {
+      const data = await userService.login(
+        accountForm.value.account,
+        accountForm.value.password
+      );
+      userStore.setUserInfo(data);
+      notification.success({
+        content: "登录成功",
+        duration: 3000,
+        keepAliveOnHover: true,
+      });
+    } else if (loginMethod.value === 1) {
+      notification.warning({
+        content: "手机登录还没写好！",
+        duration: 3000,
+        keepAliveOnHover: true,
+      });
+    }
+  } catch (error: any) {
+    notification.error({
+      content: error.response.data.message,
+      duration: 3000,
+      keepAliveOnHover: true,
+    });
+  }
+  isLoading.value = false;
 };
 </script>
 <style scoped lang="scss">
