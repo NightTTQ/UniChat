@@ -90,7 +90,7 @@
         </n-form-item>
       </n-form>
       <div class="more">
-        <n-a href="">注册</n-a>
+        <router-link to="register"><n-a>注册</n-a></router-link>
         <n-a href="">忘记密码</n-a>
       </div>
     </div>
@@ -117,12 +117,21 @@ const login = async () => {
         accountForm.value.account,
         accountForm.value.password
       );
-      userStore.setUserInfo(data);
-      notification.success({
-        content: "登录成功",
-        duration: 3000,
-        keepAliveOnHover: true,
-      });
+      if (data.code === 200) {
+        userStore.setUserInfo(data.data);
+        notification.success({
+          content: "登录成功",
+          duration: 3000,
+          keepAliveOnHover: true,
+        });
+      } else {
+        notification.error({
+          content: "登录失败",
+          duration: 3000,
+          keepAliveOnHover: true,
+        });
+        // TODO：自动登出
+      }
     } else if (loginMethod.value === 1) {
       notification.warning({
         content: "手机登录还没写好！",
@@ -132,7 +141,7 @@ const login = async () => {
     }
   } catch (error: any) {
     notification.error({
-      content: error.response.data.message,
+      content: error.response.data.error.message,
       duration: 3000,
       keepAliveOnHover: true,
     });
