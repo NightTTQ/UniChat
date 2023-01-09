@@ -17,8 +17,14 @@
           <div class="tabs-item-text">手机登录</div>
         </div>
       </n-el>
-      <n-form v-show="loginMethod === 0" :model="accountForm" class="form">
-        <n-form-item :show-label="false">
+      <n-form
+        v-show="loginMethod === 0"
+        :model="accountForm"
+        class="form"
+        :rules="accountFormRules"
+        ref="accountFormRef"
+      >
+        <n-form-item :show-label="false" path="account">
           <n-input
             v-model:value="accountForm.account"
             placeholder="输入邮箱/账号名"
@@ -27,7 +33,7 @@
             type="account"
           />
         </n-form-item>
-        <n-form-item :show-label="false">
+        <n-form-item :show-label="false" path="password">
           <n-input
             v-model:value="accountForm.password"
             placeholder="请输入登录密码"
@@ -90,7 +96,7 @@
         </n-form-item>
       </n-form>
       <div class="more">
-        <n-a href="">注册</n-a>
+        <router-link to="register"><n-a>注册</n-a></router-link>
         <n-a href="">忘记密码</n-a>
       </div>
     </div>
@@ -98,7 +104,8 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
-import { useNotification } from "naive-ui";
+import { useNotification, FormInst, FormRules } from "naive-ui";
+import router from "@/router";
 import userService from "@/services/userService";
 import { useUserStore } from "@/stores";
 
@@ -108,22 +115,47 @@ const accountForm = ref({ account: "", password: "" });
 const phoneForm = ref({ phone: "", code: "" });
 const notification = useNotification();
 const userStore = useUserStore();
+const accountFormRef = ref<FormInst | null>(null);
+
+const accountFormRules: FormRules = {
+  account: [
+    { required: true, message: "请输入账号", trigger: ["blur", "input"] },
+  ],
+  password: [
+    { required: true, message: "请输入密码", trigger: ["blur", "input"] },
+  ],
+};
 
 const login = async () => {
-  isLoading.value = true;
   try {
     if (loginMethod.value === 0) {
+      try {
+        await accountFormRef.value?.validate();
+      } catch (error) {
+        return;
+      }
+      isLoading.value = true;
       const data = await userService.login(
         accountForm.value.account,
         accountForm.value.password
       );
-      userStore.setUserInfo(data);
-      notification.success({
-        content: "登录成功",
-        duration: 3000,
-        keepAliveOnHover: true,
-      });
+      if (data.code === 200) {
+        userStore.setUserInfo(data.data);
+        notification.success({
+          content: "登录成功",
+          duration: 3000,
+          keepAliveOnHover: true,
+        });
+      } else {
+        notification.error({
+          content: "登录失败",
+          duration: 3000,
+          keepAliveOnHover: true,
+        });
+        router.push({ name: "logout" });
+      }
     } else if (loginMethod.value === 1) {
+      isLoading.value = true;
       notification.warning({
         content: "手机登录还没写好！",
         duration: 3000,
@@ -132,7 +164,7 @@ const login = async () => {
     }
   } catch (error: any) {
     notification.error({
-      content: error.response.data.message,
+      content: error.response.data.error.message,
       duration: 3000,
       keepAliveOnHover: true,
     });
