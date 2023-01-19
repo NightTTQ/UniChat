@@ -5,6 +5,7 @@ const api = {
   login: "/auth/login",
   register: "/auth/register",
   logout: "/auth/logout",
+  info: "/user/info",
 };
 
 /**
@@ -48,6 +49,7 @@ async function logout() {
   const userStore = useUserStore();
   const { data } = await request.get(api.logout);
   if (data.code === 200) {
+    userStore.setSessionID("");
     userStore.setUserInfo({});
     return true;
   } else {
@@ -55,5 +57,16 @@ async function logout() {
   }
 }
 
-export { login, register, logout };
-export default { login, register, logout };
+/**
+ * @desc 获取当前用户信息
+ */
+async function info() {
+  const userStore = useUserStore();
+  const { data } = await request.get(api.info, {
+    params: { sessionID: userStore.sessionID },
+  });
+  return data;
+}
+
+export { login, register, logout, info };
+export default { login, register, logout, info };

@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    ChatPanel: typeof import('./src/components/chat/chatPanel.vue')['default']
     HomeContent: typeof import('./src/components/home/homeContent.vue')['default']
     HomeFooter: typeof import('./src/components/home/homeFooter.vue')['default']
     HomeHeader: typeof import('./src/components/home/homeHeader.vue')['default']
@@ -35,5 +36,7 @@ declare module '@vue/runtime-core' {
     RegisterCard: typeof import('./src/components/register/registerCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SideBar: typeof import('./src/components/chat/sideBar.vue')['default']
+    SideBarItem: typeof import('./src/components/chat/sideBarItem.vue')['default']
   }
 }
