@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    ChatPanel: typeof import('./src/components/chat/chatPanel.vue')['default']
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     LoginCard: typeof import('./src/components/login/loginCard.vue')['default']
     Logout: typeof import('./src/components/Logout.vue')['default']
@@ -22,8 +23,11 @@ declare module '@vue/runtime-core' {
     NInput: typeof import('naive-ui')['NInput']
     NInputGroup: typeof import('naive-ui')['NInputGroup']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
+    NotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     RegisterCard: typeof import('./src/components/register/registerCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SideBar: typeof import('./src/components/chat/sideBar.vue')['default']
+    SideBarItem: typeof import('./src/components/chat/sideBarItem.vue')['default']
   }
 }
