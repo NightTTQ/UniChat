@@ -8,6 +8,9 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     ChatPanel: typeof import('./src/components/chat/chatPanel.vue')['default']
+    HomeContent: typeof import('./src/components/home/homeContent.vue')['default']
+    HomeFooter: typeof import('./src/components/home/homeFooter.vue')['default']
+    HomeHeader: typeof import('./src/components/home/homeHeader.vue')['default']
     LoginCard: typeof import('./src/components/login/loginCard.vue')['default']
     Logout: typeof import('./src/components/Logout.vue')['default']
     NA: typeof import('naive-ui')['NA']
@@ -20,6 +23,9 @@ declare module '@vue/runtime-core' {
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
     NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
+    NGrid: typeof import('naive-ui')['NGrid']
+    NGridItem: typeof import('naive-ui')['NGridItem']
+    NH3: typeof import('naive-ui')['NH3']
     NIcon: typeof import('naive-ui')['NIcon']
     NImage: typeof import('naive-ui')['NImage']
     NInput: typeof import('naive-ui')['NInput']
