@@ -13,4 +13,16 @@ import { darkTheme, useOsTheme } from "naive-ui";
 
 const useDarkTheme = ref(useOsTheme().value === "dark" ? true : false);
 </script>
-<style scoped></style>
+<style scoped>
+* {
+  border: 0;
+  box-sizing: border-box;
+  margin: 0;
+  border: 0;
+}
+
+html body {
+  margin: 0;
+  border: 0;
+}
+</style>

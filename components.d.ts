@@ -7,7 +7,9 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
+    ChatDisplay: typeof import('./src/components/chat/chatDisplay.vue')['default']
+    ChatInput: typeof import('./src/components/chat/chatInput.vue')['default']
+    ChatRoom: typeof import('./src/components/chat/chatRoom.vue')['default']
     LoginCard: typeof import('./src/components/login/loginCard.vue')['default']
     Logout: typeof import('./src/components/Logout.vue')['default']
     NA: typeof import('naive-ui')['NA']
@@ -18,12 +20,20 @@ declare module '@vue/runtime-core' {
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
     NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
+    NH2: typeof import('naive-ui')['NH2']
     NIcon: typeof import('naive-ui')['NIcon']
     NInput: typeof import('naive-ui')['NInput']
     NInputGroup: typeof import('naive-ui')['NInputGroup']
+    NLayout: typeof import('naive-ui')['NLayout']
+    NLayoutContent: typeof import('naive-ui')['NLayoutContent']
+    NLayoutHeader: typeof import('naive-ui')['NLayoutHeader']
+    NLayoutSider: typeof import('naive-ui')['NLayoutSider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
+    NScrollbar: typeof import('naive-ui')['NScrollbar']
     RegisterCard: typeof import('./src/components/register/registerCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UserList: typeof import('./src/components/chat/userList.vue')['default']
+    UserPanel: typeof import('./src/components/chat/userPanel.vue')['default']
   }
 }

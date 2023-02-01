@@ -146,6 +146,7 @@ const login = async () => {
           duration: 3000,
           keepAliveOnHover: true,
         });
+        router.push({ name: "main"});
       } else {
         notification.error({
           content: "登录失败",
