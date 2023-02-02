@@ -4,7 +4,7 @@ import { UserInfo } from "@/types";
 
 const useUserStore = defineStore({
   id: "user",
-  state: (): { userInfo: UserInfo } => {
+  state: (): { userInfo: UserInfo; sessionID: string | null } => {
     return {
       userInfo: {
         username: null,
@@ -13,6 +13,7 @@ const useUserStore = defineStore({
         createdAt: null,
         updatedAt: null,
       },
+      sessionID: null,
     };
   },
   getters: {},
@@ -20,6 +21,13 @@ const useUserStore = defineStore({
     setUserInfo(userInfo: UserInfo) {
       this.userInfo = userInfo;
     },
+    setSessionID(sessionID: string) {
+      this.sessionID = sessionID;
+    },
+  },
+  persist: {
+    key: "user",
+    storage: window.localStorage,
   },
 });
 

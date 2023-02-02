@@ -140,13 +140,13 @@ const login = async () => {
         accountForm.value.password
       );
       if (data.code === 200) {
-        userStore.setUserInfo(data.data);
+        userStore.setSessionID(data.data.sessionID);
         notification.success({
           content: "登录成功",
           duration: 3000,
           keepAliveOnHover: true,
         });
-        router.push({ name: "main"});
+        router.push({ name: "chat" });
       } else {
         notification.error({
           content: "登录失败",

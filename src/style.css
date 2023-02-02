@@ -25,6 +25,5 @@ a {
 }
 #app {
   margin: 0 auto;
-  /* text-align: center; */
   width: -webkit-fill-available;
 }

@@ -1,27 +1,24 @@
 <template>
   <div class="wrapper">
-    <n-button type="primary" @click="goLogin">
-      登录<n-icon class="icon"><ArrowForward /> </n-icon>
-    </n-button>
+    <div class="header"><HomeHeader /></div>
+    <div class="container"><HomeContent /></div>
+    <div class="footer"><HomeFooter /></div>
+    <n-back-top :right="40" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ArrowForward } from "@vicons/ionicons5";
+import HomeHeader from "@/components/home/homeHeader.vue";
+import HomeContent from "@/components/home/homeContent.vue";
+import HomeFooter from "@/components/home/homeFooter.vue";
 import router from "@/router";
-
-const goLogin = () => {
-  router.push({ name: "login" });
-};
 </script>
 
 <style scoped lang="scss">
 .wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  .icon {
-    margin-left: 0.5em;
+  .header {
+    position: sticky;
+    top: 0;
   }
 }
 </style>
