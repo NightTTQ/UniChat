@@ -1,31 +1,46 @@
 <template></template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted } from "vue";
 import { useNotification } from "naive-ui";
 import router from "@/router";
+import { useUserStore } from "@/stores";
 import userService from "@/services/userService";
 
 const notification = useNotification();
+const userStore = useUserStore();
 
 onMounted(() => {
   doLogout();
 });
 
 const doLogout = async () => {
-  const result = await userService.logout();
-  if (result) {
-    notification.success({
-      content: "已退出登录",
-      duration: 3000,
-      keepAliveOnHover: true,
-    });
-    router.push({ name: "login" });
-  } else {
+  const sessionID = userStore.sessionID;
+  if (!sessionID) {
     notification.error({
-      content: "退出登录失败",
+      content: "请重新登录",
       duration: 3000,
-      keepAliveOnHover: true,
     });
+  } else {
+    try {
+      const result = await userService.logout(sessionID);
+      if (result) {
+        notification.success({
+          content: "已退出登录",
+          duration: 3000,
+        });
+      } else {
+        notification.error({
+          content: "请重新登录",
+          duration: 3000,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        content: "请重新登录",
+        duration: 3000,
+      });
+    }
   }
+  router.push({ name: "login" });
 };
 </script>

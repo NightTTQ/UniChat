@@ -4,16 +4,16 @@ import { UserInfo } from "@/types";
 
 const useUserStore = defineStore({
   id: "user",
-  state: (): { userInfo: UserInfo; sessionID: string | null } => {
+  state: (): { userInfo: UserInfo; sessionID?: string } => {
     return {
       userInfo: {
-        username: null,
-        password: null,
-        avatar: null,
-        createdAt: null,
-        updatedAt: null,
+        username: undefined,
+        password: undefined,
+        avatar: undefined,
+        createdAt: undefined,
+        updatedAt: undefined,
       },
-      sessionID: null,
+      sessionID: undefined,
     };
   },
   getters: {},

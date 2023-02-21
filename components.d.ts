@@ -7,13 +7,16 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
-    ChatDisplay: typeof import('./src/components/chat/chatDisplay.vue')['default']
-    ChatInput: typeof import('./src/components/chat/chatInput.vue')['default']
-    ChatPanel: typeof import('./src/components/chat/chatPanel.vue')['default']
+    ChatContent: typeof import('./src/components/chat/chatPanel/chatContent.vue')['default']
+    ChatDisplay: typeof import('./src/components/chat/chatPanel/chatDisplay.vue')['default']
+    ChatInput: typeof import('./src/components/chat/chatPanel/chatInput.vue')['default']
+    ChatList: typeof import('./src/components/chat/chatList/chatList.vue')['default']
+    ChatPanel: typeof import('./src/components/chat/chatPanel/chatPanel.vue')['default']
     ChatRoom: typeof import('./src/components/chat/chatRoom.vue')['default']
     HomeContent: typeof import('./src/components/home/homeContent.vue')['default']
     HomeFooter: typeof import('./src/components/home/homeFooter.vue')['default']
     HomeHeader: typeof import('./src/components/home/homeHeader.vue')['default']
+    ListItem: typeof import('./src/components/chat/chatList/listItem.vue')['default']
     LoginCard: typeof import('./src/components/login/loginCard.vue')['default']
     Logout: typeof import('./src/components/Logout.vue')['default']
     NA: typeof import('naive-ui')['NA']
@@ -32,6 +35,8 @@ declare module '@vue/runtime-core' {
     NInput: typeof import('naive-ui')['NInput']
     NInputGroup: typeof import('naive-ui')['NInputGroup']
     NLayout: typeof import('naive-ui')['NLayout']
+    NLayoutContent: typeof import('naive-ui')['NLayoutContent']
+    NLayoutHeader: typeof import('naive-ui')['NLayoutHeader']
     NLayoutSider: typeof import('naive-ui')['NLayoutSider']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NTabPane: typeof import('naive-ui')['NTabPane']
@@ -39,9 +44,11 @@ declare module '@vue/runtime-core' {
     RegisterCard: typeof import('./src/components/register/registerCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Settings: typeof import('./src/components/main/settings.vue')['default']
     SideBar: typeof import('./src/components/chat/sideBar.vue')['default']
     SideBarItem: typeof import('./src/components/chat/sideBarItem.vue')['default']
-    UserList: typeof import('./src/components/chat/userList.vue')['default']
-    UserPanel: typeof import('./src/components/chat/userPanel.vue')['default']
+    UserInfo: typeof import('./src/components/main/userInfo.vue')['default']
+    UserList: typeof import('./src/components/chat/chatList/userList.vue')['default']
+    UserPanel: typeof import('./src/components/chat/chatList/userPanel.vue')['default']
   }
 }

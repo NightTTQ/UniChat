@@ -4,7 +4,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
+      path: "/index",
       name: "home",
       component: () => import("@/views/HomeView.vue"),
     },
@@ -21,17 +21,28 @@ const router = createRouter({
       meta: {},
     },
     {
-      path: "/chat",
-      name: "chat",
-      component: () => import("@/views/ChatView.vue"),
-      meta: {},
+      path: "/logout",
+      name: "logout",
+      component: () => import("@/components/Logout.vue"),
     },
     {
-      path: "/main",
+      path: "/",
       name: "main",
       component: () => import("@/views/MainView.vue"),
-      meta: {}
-    }
+      meta: {},
+      children: [
+        {
+          path: "chat",
+          name: "chat",
+          component: () => import("@/views/ChatView.vue"),
+        },
+        {
+          path: "contact",
+          name: "contact",
+          component: () => import("@/views/ContactView.vue"),
+        },
+      ],
+    },
   ],
 });
 

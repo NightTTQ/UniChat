@@ -1,9 +1,9 @@
 declare type UserInfo = {
-  username?: string | null;
-  password?: string | null;
-  avatar?: string | null;
-  createdAt?: Date | null;
-  updatedAt?: Date | null;
+  username?: string;
+  password?: string;
+  avatar?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export { UserInfo };
