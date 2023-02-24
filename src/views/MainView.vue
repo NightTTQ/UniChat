@@ -45,7 +45,7 @@
       </n-layout-sider>
       <n-layout-content content-style="overflow: hidden">
         <router-view v-slot="{ Component }">
-          <transition>
+          <transition mode="out-in">
             <keep-alive>
               <component :is="Component" />
             </keep-alive>
@@ -60,12 +60,16 @@
 import { ref, onBeforeMount } from "vue";
 import { useNotification } from "naive-ui";
 import { ChatbubbleOutline, Person, Settings } from "@vicons/ionicons5";
-import { useUserStore } from "@/stores";
+import { useUserStore, useContactsStore, useGroupsStore } from "@/stores";
 import router from "@/router";
 import { info } from "@/services/userService";
+import { getList as getContacts } from "@/services/contactService";
+import { getList as getGroups } from "@/services/groupService";
 
 const notification = useNotification();
 const userStore = useUserStore();
+const contactStore = useContactsStore();
+const groupStore = useGroupsStore();
 const userInfo = userStore.userInfo;
 const active = ref(router.currentRoute.value.name);
 
@@ -83,6 +87,7 @@ const handleClick = (icon: string) => {
 };
 
 onBeforeMount(async () => {
+  // 数据初始化
   if (!userStore.sessionID) {
     // session不存在，认为未登录跳到介绍页
     notification.error({ content: "请先登录", duration: 3000 });
@@ -91,9 +96,24 @@ onBeforeMount(async () => {
   } else {
     // session存在，获取用户信息
     try {
-      const res = await info(userStore.sessionID);
-      if (res.code === 200) {
-        userStore.setUserInfo(res.data);
+      // step1 获取用户信息
+      const userInfo = await info(userStore.sessionID);
+      if (userInfo.code === 200) {
+        userStore.setUserInfo(userInfo.data);
+      }
+      // step2 获取用户通讯录
+      const contacts = await getContacts(userStore.sessionID);
+      if (contacts.code === 200 && Array.isArray(contacts.data)) {
+        for (const item of contacts.data) {
+          contactStore.addContact(item);
+        }
+      }
+      // step3 获取用户群聊列表
+      const groups = await getGroups(userStore.sessionID);
+      if (groups.code === 200 && Array.isArray(groups.data)) {
+        for (const item of groups.data) {
+          groupStore.addGroup(item);
+        }
       }
     } catch (error: any) {
       if (error.response.data.code === 401) {

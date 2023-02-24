@@ -15,7 +15,7 @@ import { darkTheme, useOsTheme } from "naive-ui";
 
 const useDarkTheme = ref(useOsTheme().value === "dark" ? true : false);
 </script>
-<style scoped>
+<style>
 * {
   border: 0;
   box-sizing: border-box;
