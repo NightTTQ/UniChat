@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-import { UserInfo } from "@/types";
+import { UserInfo, Contact, Group } from "@/types";
 
 const useUserStore = defineStore({
   id: "user",
@@ -31,4 +31,57 @@ const useUserStore = defineStore({
   },
 });
 
-export { useUserStore };
+const useContactsStore = defineStore({
+  id: "contacts",
+  state: (): { contacts: Record<string, Contact> } => {
+    return { contacts: {} };
+  },
+  getters: {},
+  actions: {
+    addContact(item: Contact) {
+      this.contacts[item._id] = {
+        _id: item._id,
+        username: item.username,
+        avatar: item.avatar,
+        roomId: item.roomId,
+      };
+    },
+    removeContact(item: Contact) {
+      delete this.contacts[item._id];
+    },
+  },
+  persist: {
+    key: "contacts",
+    storage: window.localStorage,
+  },
+});
+
+const useGroupsStore = defineStore({
+  id: "groups",
+  state: (): { groups: Record<string, Group> } => {
+    return { groups: {} };
+  },
+  getters: {},
+  actions: {
+    addGroup(item: Group) {
+      this.groups[item._id] = {
+        _id: item._id,
+        groupAvatar: item.groupAvatar,
+        groupName: item.groupName,
+        groupInfo: item.groupInfo,
+        user: item.user,
+        admin: item.admin,
+        owner: item.owner,
+      };
+    },
+    removeGroup(item: Group) {
+      delete this.groups[item._id];
+    },
+  },
+  persist: {
+    key: "groups",
+    storage: window.localStorage,
+  },
+});
+
+export { useUserStore, useContactsStore, useGroupsStore };
