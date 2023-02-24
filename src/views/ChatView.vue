@@ -17,6 +17,7 @@ import UserList from "@/components/chat/userList.vue";
 import { getMessage } from "@/services/chatService";
 
 const notification = useNotification();
+// 用户个人信息
 const userStore = useUserStore();
 const userInfo = ref({});
 
