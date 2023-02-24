@@ -1,19 +1,9 @@
 <template>
-  <div style="height: 40%;">
-    <textarea :value="message">
-    </textarea>
-    <!-- <button style="position: absolute; bottom: 10px">发送</button> -->
-  </div>
+  <div>Here is Input area</div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-
-const message = ref("");
-
-const sendMessage = () => {
-  // unimplemented
-};
 </script>
 
 <style scoped>
@@ -28,5 +18,4 @@ textarea {
   border: 0;
   outline-color: red;
 }
-
 </style>

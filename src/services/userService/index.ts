@@ -43,14 +43,16 @@ async function register(username: string, password: string) {
 }
 
 /**
- * @desc 用户退出登录，会自动清空登录态
+ * @desc 用户退出登录，不论服务器session是否注销成功，都会自动清空登录态
  */
-async function logout() {
+async function logout(sessionID: string) {
   const userStore = useUserStore();
-  const { data } = await request.get(api.logout);
+  const { data } = await request.get(api.logout, {
+    params: { sessionID: sessionID },
+  });
+  userStore.setSessionID("");
+  userStore.setUserInfo({});
   if (data.code === 200) {
-    userStore.setSessionID("");
-    userStore.setUserInfo({});
     return true;
   } else {
     return false;
@@ -58,12 +60,13 @@ async function logout() {
 }
 
 /**
- * @desc 获取当前用户信息
+ * @desc 获取用户信息
+ * @param sessionID 查询身份的用户session
+ * @param userId 查询的用户id
  */
-async function info() {
-  const userStore = useUserStore();
+async function info(sessionID: string, userId?: string) {
   const { data } = await request.get(api.info, {
-    params: { sessionID: userStore.sessionID },
+    params: { sessionID: sessionID, userId: userId },
   });
   return data;
 }
