@@ -1,40 +1,45 @@
 <template>
-  <div>
-    <n-layout style="height: 100vh" has-sider>
-      <ChatList />
-      <ChatPanel />
-    </n-layout>
-  </div>
+  <n-layout style="height: 100vh" has-sider>
+    <ChatList :chats="chats" />
+    <ChatPanel v-show="curRoom.roomId" :chat-info="curRoom" />
+  </n-layout>
 </template>
 <script setup lang="ts">
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, Ref } from "vue";
+import { storeToRefs } from "pinia";
 import { useNotification } from "naive-ui";
 
 import { ChatList } from "@/components/chat/chatList";
 import { ChatPanel } from "@/components/chat/chatPanel";
-import { useUserStore } from "@/stores";
-import { getMessage } from "@/services/chatService";
+import { useChatsStore } from "@/stores";
+import { Chat } from "@/types";
+import { getUnreadMessage } from "@/services/chatService";
 
 const notification = useNotification();
-const userStore = useUserStore();
-const userInfo = ref({});
+const chatStore = useChatsStore();
+const chats = storeToRefs(useChatsStore()).chats;
+const curRoom: Ref<Chat> = ref({
+  roomId: "",
+  type: 1,
+  avatar: "",
+  name: "",
+  lastMessage: undefined,
+});
 
-// onBeforeMount(async () => {
-//   const data = await info();
-//   if (data.code === 200) {
-//     userStore.setUserInfo(data.data);
-//     userInfo.value = userStore.userInfo;
-//   } else {
-//     notification.error({
-//       content: "获取用户信息失败",
-//       duration: 3000,
-//       keepAliveOnHover: true,
-//     });
-//   }
-// });
+const openChat = (chat: Chat) => {
+  curRoom.value = chat;
+};
+
 const refreshData = (data: any) => {
   console.log(data);
 };
+
+// 目前先在每次刷新页面时获取所有未读消息，正确做法应该封装为worker，只在需要时获取
+onBeforeMount(() => {
+  getUnreadMessage((chat: Chat) => {
+    chatStore.addChat(chat);
+  });
+});
 </script>
 <style scoped lang="scss">
 .wrapper {

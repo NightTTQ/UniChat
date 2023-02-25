@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-import { UserInfo, Contact, Group } from "@/types";
+import { UserInfo, Contact, Group, Chat } from "@/types";
 
 const useUserStore = defineStore({
   id: "user",
@@ -84,4 +84,28 @@ const useGroupsStore = defineStore({
   },
 });
 
-export { useUserStore, useContactsStore, useGroupsStore };
+const useChatsStore = defineStore({
+  id: "chats",
+  state: (): { chats: Chat[] } => {
+    return { chats: [] };
+  },
+  getters: {},
+  actions: {
+    addChat(item: Chat) {
+      const index = this.chats.findIndex(
+        (chat) => chat.roomId === item.roomId && chat.type === chat.type
+      );
+      if (index !== -1) {
+        this.chats[index] = item;
+      } else {
+        this.chats.push(item);
+      }
+    },
+  },
+  persist: {
+    key: "chats",
+    storage: window.localStorage,
+  },
+});
+
+export { useUserStore, useContactsStore, useGroupsStore, useChatsStore };

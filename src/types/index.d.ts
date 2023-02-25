@@ -28,4 +28,33 @@ declare type Group = {
   /**@desc 群主 */
   owner: string;
 };
-export { UserInfo, Contact, Group };
+
+declare type Chat = {
+  type: number;
+  roomId: string;
+  avatar: string;
+  name: string;
+  lastMessage?: Message;
+  userId?: string;
+};
+
+declare type Message = {
+  /**@desc 对应List中的_id */
+  roomId: Types.ObjectId;
+  /**@desc 发送者_id */
+  fromId: Types.ObjectId;
+  /**@desc 回复消息_Id */
+  replyId: Types.ObjectId;
+  /**@desc 消息类型。1纯文本，2纯图片，3富文本。后续添加文件等消息类别 */
+  msgType: number;
+  // 消息主体
+  content: string;
+  /**@desc 已修改 */
+  edited: boolean;
+  /**@desc 已删除 */
+  deleted: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export { UserInfo, Contact, Group, Chat, Message };

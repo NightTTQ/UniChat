@@ -1,34 +1,60 @@
 <template>
-  <div>
-    <div class="user-panel">
-      <img :src="userInfo.avatarUrl" alt="error" />
-      <n-h2>{{ userInfo.username }}</n-h2>
+  <div class="wrapper">
+    <div class="img-area">
+      <img class="img" draggable="false" :src="avatar" />
+    </div>
+
+    <div class="text-area">
+      <n-h3 class="name-text">{{ name }}</n-h3>
+      <n-p class="last-message">{{
+        fromUser
+          ? `${fromUser}:${lastMessage?.content}`
+          : `${lastMessage?.content}`
+      }}</n-p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { Message } from "@/types";
 
-// default
-const userInfo = reactive({
-  avatarUrl:
-    "https://ts2.cn.mm.bing.net/th?id=OIP-C.ei7qo_LySD7h3QNJaHJO-AAAAA&w=250&h=250&c=8&rs=1&qlt=90&o=6&dpr=1.4&pid=3.1&rm=2",
-  username: "user",
-});
+const props = defineProps<{
+  avatar: string;
+  name: string;
+  roomId: string;
+  type: number;
+  lastMessage?: Message;
+  fromUser?: string;
+}>();
 </script>
 
-<style scoped>
-.user-panel {
+<style lang="scss" scoped>
+.wrapper {
   height: 80px;
   display: flex;
-  box-sizing: content-box;
-  align-items: center;
-}
-
-.user-panel img {
-  height: 40px;
-  margin-left: 10px;
-  margin-right: 10px;
+  justify-content: left;
+  column-gap: 1em;
+  .img-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .img {
+      height: 60px;
+      width: 60px;
+      border-radius: 50%;
+    }
+  }
+  .text-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    .name-text {
+      margin: 0;
+    }
+    .last-message {
+      margin: 0;
+      opacity: 0.8;
+    }
+  }
 }
 </style>

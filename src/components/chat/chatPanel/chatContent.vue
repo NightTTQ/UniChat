@@ -1,25 +1,27 @@
 <template>
-  <div class="chat-display">
-    <div class="chat-display-header">
-      <span style="text-align: center">头部导航条</span>
+  <div class="content-wrapper">
+    <div class="content-header">
+      <h4>{{ props.name }}</h4>
     </div>
-    <div class="chat-content"></div>
+    <div class="content-area"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+
+const props = defineProps<{ name: string }>();
 </script>
 
 <style scoped>
-.chat-display {
-  height: 60%;
+.content-wrapper {
+  flex: 1;
 }
-.chat-display-header {
+.content-header {
   display: flex;
-  height: 40px;
-  padding: 10px;
+  height: 64px;
+  padding: 1em;
   text-align: center;
-  border-bottom: 1px red;
+  background-color: rgb(24, 24, 28);
 }
 </style>

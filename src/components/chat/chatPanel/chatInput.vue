@@ -1,21 +1,31 @@
 <template>
-  <div>Here is Input area</div>
+  <div class="input-wrapper">
+    <n-input
+      v-model:value="text"
+      type="textarea"
+      :autosize="{
+        minRows: 1,
+        maxRows: 12,
+      }"
+      placeholder=""
+    />
+    <div v-show="text !== ''">Send</div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
+
+const text = ref("");
 </script>
 
 <style scoped>
-textarea {
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  resize: none;
-  text-align: left;
-  font: 16px 宋体;
-  border: 0;
-  outline-color: red;
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: 1em;
+  background-color: var(--n-color);
+  padding: 1em;
 }
 </style>
