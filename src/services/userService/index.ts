@@ -1,5 +1,6 @@
 import request from "@/services/axios/request";
 import { useUserStore } from "@/stores";
+import { UserInfo, Response } from "@/types";
 
 const api = {
   login: "/auth/login",
@@ -65,7 +66,7 @@ async function logout(sessionID: string) {
  * @param userId 查询的用户id
  */
 async function info(sessionID: string, userId?: string) {
-  const { data } = await request.get(api.info, {
+  const { data } = await request.get<Response<UserInfo>>(api.info, {
     params: { sessionID: sessionID, userId: userId },
   });
   return data;

@@ -57,4 +57,10 @@ declare type Message = {
   updatedAt: Date;
 };
 
-export { UserInfo, Contact, Group, Chat, Message };
+// 响应体 T
+declare type Response<T> = {
+  code: number;
+  data: T;
+  message: string;
+};
+export { UserInfo, Contact, Group, Chat, Message, Response };

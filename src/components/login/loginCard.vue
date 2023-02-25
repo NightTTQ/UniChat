@@ -146,7 +146,7 @@ const login = async () => {
           duration: 3000,
           keepAliveOnHover: true,
         });
-        router.push({ name: "chat" });
+        router.push({ name: "single" });
       } else {
         notification.error({
           content: "登录失败",
