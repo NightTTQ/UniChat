@@ -1,5 +1,7 @@
 import request from "@/services/axios/request";
 
+import { Response, Contact } from "@/types";
+
 const api = {
   list: "/contact/list",
   request: "/contact/request",
@@ -12,7 +14,7 @@ const api = {
  * @param sessionID 用户的sessionID
  */
 async function getList(sessionID: string) {
-  const { data } = await request.get(api.list, {
+  const { data } = await request.get<Response<Contact[]>>(api.list, {
     params: { sessionID: sessionID },
   });
   return data;

@@ -4,7 +4,8 @@
       v-for="item in callbackInfo"
       :key="item.labelname"
       class="slider-item"
-      @click="toggleBottomLine($event, item.callback)"
+      :id="item.name"
+      @click="item.callback"
     >
       <button>{{ item.labelname }}</button>
     </div>
@@ -12,34 +13,34 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
+import router from "@/router";
 
 import type { CallbackInfo } from "./type";
 
-defineProps<{
+const props = defineProps<{
   callbackInfo: CallbackInfo[];
 }>();
+// 所有路由名
+const names = props.callbackInfo.map((info) => info.name);
 
-// 选中首个元素
+// 用于在用户直接输入地址栏时调整样式
 const init = () => {
-  console.log();
-  document.querySelectorAll("button")[0].id = "active";
+  const name = router.currentRoute.value.name;
+  name && changeActive(name as string);
 };
 
-// 控制底部栏
-const toggleBottomLine = (eve: Event, callback: () => void) => {
-  // 被点击的元素
-  const ele = eve.target as HTMLDivElement;
-  const activeEle = document.querySelector("#active");
-
-  if (activeEle) {
-    activeEle.removeAttribute("id");
-    ele.setAttribute("id", "active");
-    callback();
-  } else {
-    init();
+const changeActive = (currentRouteName: string) => {
+  if (currentRouteName && names.includes(currentRouteName)) {
+    document.querySelector(".active")?.classList.remove("active");
+    const ele = document.getElementById(currentRouteName as string);
+    ele?.classList.add("active");
   }
 };
+// 路由变换时更改样式
+watch(router.currentRoute, (e) => changeActive(e.name as string), {
+  immediate: true,
+});
 
 onMounted(init);
 </script>
@@ -70,11 +71,7 @@ onMounted(init);
   box-sizing: border-box;
 }
 
-button[id="active"] {
-  border-bottom: 2px solid blue;
-}
-
-.slider-item[id="active"] button {
+.active button {
   border-bottom: 2px solid blue;
 }
 </style>

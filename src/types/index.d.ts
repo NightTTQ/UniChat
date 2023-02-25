@@ -28,4 +28,12 @@ declare type Group = {
   /**@desc 群主 */
   owner: string;
 };
-export { UserInfo, Contact, Group };
+
+// 响应体 T
+declare type Response<T> = {
+  code: number,
+  data: T,
+  message: string
+}
+
+export { UserInfo, Contact, Group, Response };

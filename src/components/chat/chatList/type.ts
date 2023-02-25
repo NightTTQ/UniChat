@@ -1,4 +1,5 @@
 export type CallbackInfo = {
     labelname: string,
-    callback: () => void
+    callback: () => void,
+    name: string
 }

@@ -20,12 +20,14 @@ const callbackInfo: CallbackInfo[] = [
     callback: () => {
       router.push({ name: "single" });
     },
+    name: "single"
   },
   {
     labelname: "群聊",
     callback: () => {
       router.push({ name: "group" });
     },
+    name: "group"
   },
 ];
 </script>

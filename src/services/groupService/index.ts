@@ -1,4 +1,5 @@
 import request from "@/services/axios/request";
+import { Response, Group } from "@/types";
 
 const api = {
   list: "/group/list",
@@ -12,7 +13,7 @@ const api = {
  * @param sessionID 用户的sessionID
  */
 async function getList(sessionID: string) {
-  const { data } = await request.get(api.list, {
+  const { data } = await request.get<Response<Group[]>>(api.list, {
     params: { sessionID: sessionID },
   });
   return data;
@@ -31,8 +32,8 @@ async function getRequest(
   status?: number,
   skip?: number,
   limit?: number
-) {
-  const { data } = await request.get(api.request, {
+){
+  const { data } = await request.get<Response<Group[]>>(api.request, {
     params: { sessionID: sessionID, status: status, skip: skip, limit: limit },
   });
   return data;
