@@ -44,7 +44,7 @@ const router = createRouter({
             {
               path: "group",
               name: "group",
-              component: () => import("@/components/chat/chatList/groupLit.vue")
+              component: () => import("@/components/chat/chatList/groupList.vue")
             }
           ]
         },

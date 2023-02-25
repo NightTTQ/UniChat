@@ -11,7 +11,7 @@ declare module '@vue/runtime-core' {
     ChatInput: typeof import('./src/components/chat/chatPanel/chatInput.vue')['default']
     ChatList: typeof import('./src/components/chat/chatList/chatList.vue')['default']
     ChatPanel: typeof import('./src/components/chat/chatPanel/chatPanel.vue')['default']
-    GroupList: typeof import('./src/components/chat/chatList/GroupList.vue')['default']
+    GroupList: typeof import('./src/components/chat/chatList/groupList.vue')['default']
     GruopList: typeof import('./src/components/chat/chatList/gruopList.vue')['default']
     HomeContent: typeof import('./src/components/home/homeContent.vue')['default']
     HomeFooter: typeof import('./src/components/home/homeFooter.vue')['default']

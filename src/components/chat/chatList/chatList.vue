@@ -13,6 +13,7 @@ import router from "@/router";
 
 import { CallbackInfo } from "./type";
 
+// 传递给导航组件的信息
 const callbackInfo: CallbackInfo[] = [
   {
     labelname: "好友",
