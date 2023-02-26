@@ -76,8 +76,7 @@ const active = ref(router.currentRoute.value.name);
 const handleClick = (icon: string) => {
   if (icon === "chat") {
     active.value = "chat";
-    // 默认进入单聊界面
-    router.push({ name: "single" });
+    router.push({ name: "chat" });
   }
   if (icon === "contact") {
     active.value = "contact";

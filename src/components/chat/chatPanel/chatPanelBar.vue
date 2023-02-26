@@ -3,7 +3,6 @@
     <div class="content-header">
       <h4>{{ props.name }}</h4>
     </div>
-    <div class="content-area"></div>
   </div>
 </template>
 

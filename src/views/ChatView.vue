@@ -1,7 +1,7 @@
 <template>
   <n-layout style="height: 100vh" has-sider>
-    <ChatList :chats="chats" />
-    <ChatPanel v-show="curRoom.roomId" :chat-info="curRoom" />
+    <ChatList :chats="chats" @select="select" />
+    <ChatPanel v-if="curRoom.roomId" :chat="curRoom" />
   </n-layout>
 </template>
 <script setup lang="ts">
@@ -26,12 +26,8 @@ const curRoom: Ref<Chat> = ref({
   lastMessage: undefined,
 });
 
-const openChat = (chat: Chat) => {
-  curRoom.value = chat;
-};
-
-const refreshData = (data: any) => {
-  console.log(data);
+const select = (room: Chat) => {
+  curRoom.value = room;
 };
 
 // 目前先在每次刷新页面时获取所有未读消息，正确做法应该封装为worker，只在需要时获取

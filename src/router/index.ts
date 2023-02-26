@@ -32,24 +32,26 @@ const router = createRouter({
       meta: {},
       children: [
         {
-          path: "chat",
+          path: "/chat",
           name: "chat",
           component: () => import("@/views/ChatView.vue"),
           children: [
             {
               path: "single",
               name: "single",
-              component: () => import("@/components/chat/chatList/singleList.vue")
+              component: () =>
+                import("@/components/chat/chatList/singleList.vue"),
             },
             {
               path: "group",
               name: "group",
-              component: () => import("@/components/chat/chatList/groupList.vue")
-            }
-          ]
+              component: () =>
+                import("@/components/chat/chatList/groupList.vue"),
+            },
+          ],
         },
         {
-          path: "contact",
+          path: "/contact",
           name: "contact",
           component: () => import("@/views/ContactView.vue"),
         },
