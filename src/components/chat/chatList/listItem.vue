@@ -46,6 +46,8 @@ const props = defineProps<{
   }
   .text-area {
     display: flex;
+    width: 0;
+    flex: 1;
     flex-direction: column;
     justify-content: center;
     .name-text {
@@ -53,6 +55,9 @@ const props = defineProps<{
     }
     .last-message {
       margin: 0;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
       opacity: 0.8;
     }
   }
