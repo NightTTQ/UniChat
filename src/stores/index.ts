@@ -108,4 +108,21 @@ const useChatsStore = defineStore({
   },
 });
 
-export { useUserStore, useContactsStore, useGroupsStore, useChatsStore };
+// 当前联系人面板信息
+const useCurrentContactStore = defineStore({
+  id: "currentContact",
+  state: () => ({
+    _id: ""
+  }),
+  actions: {
+    toggleId(_id: string) {
+      this._id = _id
+    }
+  },
+  persist: {
+    key: "currentContact",
+    storage: window.localStorage
+  }
+})
+
+export { useUserStore, useContactsStore, useGroupsStore, useChatsStore, useCurrentContactStore };

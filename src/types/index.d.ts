@@ -63,4 +63,5 @@ declare type Response<T> = {
   data: T;
   message: string;
 };
+
 export { UserInfo, Contact, Group, Chat, Message, Response };

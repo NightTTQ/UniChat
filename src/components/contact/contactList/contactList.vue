@@ -1,7 +1,7 @@
 <template>
   <div class="sider">
-    <div class="bar">
-      <n-input type="text" size="large" placeholder="搜索" />
+    <div class="bar" style="width: 250px;">
+      <n-input type="text" size="large" placeholder="搜索" style="width: 250px;"/>
     </div>
     <SliderButton :callback-info="callbackInfo"></SliderButton>
     <RouterView></RouterView>
