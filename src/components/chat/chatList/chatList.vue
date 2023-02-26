@@ -44,6 +44,7 @@ const groups = storeToRefs(useGroupsStore()).groups;
 <style lang="scss" scoped>
 .sider {
   display: flex;
+  width: 250px;
   flex-direction: column;
   overflow: hidden;
   height: 100vh;
