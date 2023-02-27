@@ -90,20 +90,31 @@ async function getLocalMessage(
 }
 
 /**
- * @desc 向服务器查询云端消息记录，并进行链表化保存至本地
+ * @desc 向服务器查询云端消息记录，并进行链表化保存至本地。
+ * 为了尽可能使云端记录与本地记录连接起来，本函数会自动将limit+1
  * @param roomId 查询的房间id
  * @param type 房间类型
+ * @param searchDir 搜索方向
  * @param startAt 开始查询的时间
+ * @param startId 开始查询的消息id
  * @returns 正序排序的本地聊天记录数组
  */
 async function getRemoteMessage(
   roomId: string,
   type: number,
-  startAt: Date,
   searchDir: 1 | -1,
+  startAt?: Date,
+  startId?: string,
   limit?: number
 ): Promise<LocalMessage[]> {
-  const messages = await getMessage(roomId, type, searchDir, startAt, limit);
+  const messages = await getMessage(
+    roomId,
+    type,
+    searchDir,
+    startAt,
+    startId,
+    limit ? Math.abs(limit) + 1 : undefined
+  );
   if (Array.isArray(messages)) {
     return await messagePersistence(messages, type);
   } else {
@@ -152,6 +163,24 @@ async function getMessages(
           }
         } else {
           // 找不到对应的消息记录，以此id直接向服务器请求
+          const messages = await getRemoteMessage(
+            roomId,
+            type,
+            searchDir,
+            undefined,
+            curId,
+            _limit - res.length
+          );
+          if (searchDir === 1) {
+            res.push(...messages);
+            curId = res[res.length - 1].next || null;
+            continue;
+          }
+          if (searchDir === -1) {
+            res.unshift(...messages);
+            curId = res[0].prev || null;
+            continue;
+          }
         }
       } else {
         /**
@@ -163,8 +192,9 @@ async function getMessages(
           const messages = await getRemoteMessage(
             roomId,
             type,
-            prevMessage.createdAt,
             searchDir,
+            prevMessage.createdAt,
+            undefined,
             _limit - res.length
           );
           res.push(...messages);
@@ -176,8 +206,9 @@ async function getMessages(
           const messages = await getRemoteMessage(
             roomId,
             type,
-            prevMessage.createdAt,
             searchDir,
+            prevMessage.createdAt,
+            undefined,
             _limit - res.length
           );
           res.unshift(...messages);
@@ -191,8 +222,9 @@ async function getMessages(
     const messages = await getRemoteMessage(
       roomId,
       type,
-      new Date(0),
       searchDir,
+      new Date(0),
+      undefined,
       _limit - res.length
     );
 

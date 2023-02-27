@@ -51,13 +51,15 @@ socket.on(events.verifySession, (data) => {
  * @param type 房间类型
  * @param searchDir 查询方向
  * @param startAt 查询开始时间
+ * @param startId 查询开始消息id
  * @param limit 查询条数
  */
 function getMessage(
   roomId: string,
   type: number,
   searchDir: 1 | -1,
-  startAt: Date,
+  startAt?: Date,
+  startId?: string,
   limit?: number
 ): Promise<Message[]> {
   return new Promise((resolve, reject) => {
@@ -71,6 +73,7 @@ function getMessage(
         type: type,
         searchDir: searchDir,
         startAt: startAt,
+        startId: startId,
         limit: limit,
       },
       reciveMessage
