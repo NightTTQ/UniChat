@@ -34,17 +34,19 @@ declare type Chat = {
   roomId: string;
   avatar: string;
   name: string;
+  lastSeenMessageId?: string;
   lastMessage?: Message;
   userId?: string;
 };
 
 declare type Message = {
+  _id: string;
   /**@desc 对应List中的_id */
-  roomId: Types.ObjectId;
+  roomId: string;
   /**@desc 发送者_id */
-  fromId: Types.ObjectId;
+  fromId: string;
   /**@desc 回复消息_Id */
-  replyId: Types.ObjectId;
+  replyId: string;
   /**@desc 消息类型。1纯文本，2纯图片，3富文本。后续添加文件等消息类别 */
   msgType: number;
   // 消息主体
@@ -57,10 +59,15 @@ declare type Message = {
   updatedAt: Date;
 };
 
+declare type LocalMessage = Message & {
+  prev?: string;
+  next?: string;
+};
+
 // 响应体 T
 declare type Response<T> = {
   code: number;
   data: T;
   message: string;
 };
-export { UserInfo, Contact, Group, Chat, Message, Response };
+export { UserInfo, Contact, Group, Chat, Message, LocalMessage, Response };

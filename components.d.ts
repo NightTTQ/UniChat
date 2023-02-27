@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    ChatContent: typeof import('./src/components/chat/chatPanel/chatContent.vue')['default']
     ChatInput: typeof import('./src/components/chat/chatPanel/chatInput.vue')['default']
     ChatList: typeof import('./src/components/chat/chatList/chatList.vue')['default']
     ChatPanel: typeof import('./src/components/chat/chatPanel/chatPanel.vue')['default']
@@ -41,6 +42,7 @@ declare module '@vue/runtime-core' {
     NMenu: typeof import('naive-ui')['NMenu']
     NNotificationProvider: typeof import('naive-ui')['NNotificationProvider']
     NP: typeof import('naive-ui')['NP']
+    NScrollbar: typeof import('naive-ui')['NScrollbar']
     NSpace: typeof import('naive-ui')['NSpace']
     RegisterCard: typeof import('./src/components/register/registerCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

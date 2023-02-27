@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 import router from "@/router";
 import { useUserStore } from "@/stores";
-import { Chat } from "@/types";
+import { Chat, Message, Response } from "@/types";
 
 const events = {
   verifySession: "verifySession",
@@ -45,12 +45,37 @@ socket.on(events.verifySession, (data) => {
   }
 });
 
-function getMessage(listener: (...args: any[]) => void) {
-  socket.emit(events.getMessage, userStore.sessionID);
-
-  if (!socket.listeners(events.getMessage).includes(listener)) {
-    socket.on(events.getMessage, listener);
-  }
+/**
+ * @desc 向服务器查询云端消息记录
+ * @param roomId 查询房间id
+ * @param type 房间类型
+ * @param searchDir 查询方向
+ * @param startAt 查询开始时间
+ * @param limit 查询条数
+ */
+function getMessage(
+  roomId: string,
+  type: number,
+  searchDir: 1 | -1,
+  startAt: Date,
+  limit?: number
+): Promise<Message[]> {
+  return new Promise((resolve, reject) => {
+    const reciveMessage = (res: Response<Message[]>) => {
+      resolve(res.data);
+    };
+    socket.emit(
+      events.getMessage,
+      {
+        roomId: roomId,
+        type: type,
+        searchDir: searchDir,
+        startAt: startAt,
+        limit: limit,
+      },
+      reciveMessage
+    );
+  });
 }
 
 function sendMessage(message: any) {

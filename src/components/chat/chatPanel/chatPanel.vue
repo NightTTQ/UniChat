@@ -3,7 +3,7 @@
     <!-- 顶部常驻栏 -->
     <PanelBar :name="name" />
     <!-- 消息内容显示区 -->
-
+    <ChatContent :chat="props.chat" />
     <!-- 消息输入发送区 -->
     <ChatInput />
   </div>
@@ -14,8 +14,9 @@ import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 
 import { useContactsStore, useGroupsStore } from "@/stores";
-import { Chat, Contact } from "@/types";
+import { Chat } from "@/types";
 import PanelBar from "./chatPanelBar.vue";
+import ChatContent from "./chatContent.vue";
 import ChatInput from "./chatInput.vue";
 
 const props = defineProps<{ chat: Chat }>();
