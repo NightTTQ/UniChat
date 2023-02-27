@@ -1,12 +1,5 @@
 <template>
   <n-layout-sider class="group-list" :native-scrollbar="false" width="100%">
-    <!-- <div class="group-list-item" v-for="group in mockGroups" :key="group._id" :native-scrollbar="false">
-      <img :src="group.groupAvatar" alt="error" />
-      <div style="display: flex; flex-direction: column;">
-        <h2>{{ group.groupName }}</h2>
-        <h5>last message</h5>
-      </div>
-    </div> -->
     <n-layout-sider class="list" :native-scrollbar="false">
       <div class="list-wrapper">
         <ContactItem
@@ -16,7 +9,9 @@
           :avatar="item.groupAvatar"
           :name="item.groupName"
           :info="item.groupInfo"
-          :type="ChatType.GROUP"
+          type="group"
+          :id="item._id"
+          :item="item"
         />
       </div>
     </n-layout-sider>
@@ -26,8 +21,6 @@
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
 import { useGroupsStore } from "@/stores";
-
-import { ChatType } from "./type";
 
 const groupsStore = useGroupsStore();
 const groups = storeToRefs(groupsStore).groups;

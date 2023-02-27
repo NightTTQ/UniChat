@@ -5,7 +5,3 @@ export type CallbackInfo = {
     name: string
 }
 
-export enum ChatType {
-    FRIENDS,
-    GROUP
-}

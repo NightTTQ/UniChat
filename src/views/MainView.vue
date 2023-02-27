@@ -80,7 +80,7 @@ const handleClick = (icon: string) => {
   }
   if (icon === "contact") {
     active.value = "contact";
-    router.push({ name: "contact" });
+    router.push({ name: "friend" });
   }
   if (icon === "settings") {
   }

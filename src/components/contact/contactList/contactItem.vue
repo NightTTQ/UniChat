@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="wrapper" @click="currentContactStore.toggleId(item._id)">
     <div class="img-area">
       <img class="img" draggable="false" :src="avatar" />
     </div>
@@ -11,17 +11,22 @@
 
 <script setup lang="ts">
 import { Message } from "@/types";
-import { ChatType } from "./type";
 
+import { useCurrentContactStore } from "@/stores";
+
+const currentContactStore = useCurrentContactStore();
 defineProps<{
   avatar: string;
   name: string;
   roomId?: string;
-  type: ChatType;
+  type: "friend" | "group";
   lastMessage?: Message;
   fromUser?: string;
-  info?: string
+  info?: string,
+  _id: string,
+  item: any
 }>();
+
 </script>
 
 <style lang="scss" scoped>
