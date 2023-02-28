@@ -23,7 +23,7 @@ defineProps<{
   lastMessage?: Message;
   fromUser?: string;
   info?: string,
-  _id: string,
+  _id?: string,
   item: any
 }>();
 
