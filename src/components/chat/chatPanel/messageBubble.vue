@@ -14,7 +14,7 @@
         {{ message.content }}
       </div>
     </div>
-    <div class="icons">
+    <div class="icons" v-if="isUserSend">
       <n-spin v-if="message.status === 1" class="loading" />
       <Checkmark v-else class="check" />
     </div>
