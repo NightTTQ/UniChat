@@ -1,11 +1,13 @@
 <template>
   <div class="content-wrapper">
     <div class="content">
-      <div class="">
-        <div v-for="message of messages">
-          <br />
-          {{ message }}
-        </div>
+      <div v-for="message of messages">
+        <Bubble
+          :message="message"
+          :is-user-send="userInfo._id === message.fromId"
+          :sender-avatar="users[message.fromId]?.avatar || ''"
+          :sender-name="users[message.fromId]?.username || message.fromId"
+        />
       </div>
     </div>
   </div>
@@ -13,13 +15,37 @@
 
 <script setup lang="ts">
 import { ref, onBeforeMount, watch } from "vue";
+import { storeToRefs } from "pinia";
 
+import Bubble from "./messageBubble.vue";
 import { Chat, LocalMessage } from "@/types";
+import { useUserStore, useUsersStore } from "@/stores";
 import { getMessages } from "@/services/messageService";
 
+const userInfo = storeToRefs(useUserStore()).userInfo;
+
+const usersStore = useUsersStore();
+const users = storeToRefs(usersStore).users;
 const messages = ref<LocalMessage[]>([]);
+const messageLoading = ref(false);
 
 const props = defineProps<{ chat: Chat }>();
+
+const updateMessages = async (
+  newMessages: LocalMessage[],
+  reverse: boolean = false,
+  fullUpdate: boolean = false
+) => {
+  messageLoading.value = true;
+
+  for (const message of newMessages) {
+    await usersStore.getUserById(message.fromId);
+  }
+  if (fullUpdate) messages.value = newMessages;
+  else if (reverse) messages.value.unshift(...newMessages);
+  else messages.value.push(...newMessages);
+  messageLoading.value = false;
+};
 
 watch(
   () => props.chat,
@@ -33,6 +59,8 @@ watch(
         10,
         chat.lastSeenMessageId
       );
+      updateMessages(beforeMessages, true, true);
+      // updateMessages(beforeMessages, true, false);
       const afterMessages = await getMessages(
         chat.roomId,
         chat.type,
@@ -40,11 +68,12 @@ watch(
         20,
         chat.lastSeenMessageId
       );
-      messages.value = [...beforeMessages, ...afterMessages];
+      updateMessages(afterMessages, false, false);
     } else {
       // 没有上次阅读记录，说明从未阅读过，直接获取全部消息
       const message = await getMessages(chat.roomId, chat.type, 1, 20);
-      messages.value = message;
+      updateMessages(message, false, true);
+      // updateMessages(message, false, false);
     }
   },
   { immediate: true }
@@ -86,12 +115,16 @@ watch(
 .content-wrapper {
   display: flex;
   flex: 1;
+  height: 0;
   flex-direction: column;
   justify-content: end;
   position: relative;
   .content {
+    padding: 1em;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
+    row-gap: 1em;
   }
 }
 </style>

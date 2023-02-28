@@ -52,7 +52,7 @@ async function logout(sessionID: string) {
     params: { sessionID: sessionID },
   });
   userStore.setSessionID("");
-  userStore.setUserInfo({});
+  userStore.setUserInfo({ _id: "" });
   if (data.code === 200) {
     return true;
   } else {
@@ -61,7 +61,7 @@ async function logout(sessionID: string) {
 }
 
 /**
- * @desc 获取用户信息
+ * @desc 获取用户信息。请在成功获取用户信息后保存至usersStore中
  * @param sessionID 查询身份的用户session
  * @param userId 查询的用户id
  */

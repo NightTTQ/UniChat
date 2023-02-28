@@ -41,6 +41,7 @@ const sendMessage = () => {};
 .chat-wrapper {
   display: flex;
   flex: 1;
+  max-height: 100vh;
   flex-direction: column;
   position: relative;
 }

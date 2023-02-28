@@ -1,9 +1,7 @@
 declare type UserInfo = {
+  _id: string;
   username?: string;
-  password?: string;
   avatar?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
 };
 
 declare type Contact = {

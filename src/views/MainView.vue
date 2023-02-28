@@ -60,7 +60,12 @@
 import { ref, onBeforeMount } from "vue";
 import { useNotification } from "naive-ui";
 import { ChatbubbleOutline, Person, Settings } from "@vicons/ionicons5";
-import { useUserStore, useContactsStore, useGroupsStore } from "@/stores";
+import {
+  useUserStore,
+  useContactsStore,
+  useGroupsStore,
+  useUsersStore,
+} from "@/stores";
 import router from "@/router";
 import { info } from "@/services/userService";
 import { getList as getContacts } from "@/services/contactService";
@@ -68,6 +73,7 @@ import { getList as getGroups } from "@/services/groupService";
 
 const notification = useNotification();
 const userStore = useUserStore();
+const usersStore = useUsersStore();
 const contactStore = useContactsStore();
 const groupStore = useGroupsStore();
 const userInfo = userStore.userInfo;
@@ -100,6 +106,7 @@ onBeforeMount(async () => {
       const userInfo = await info(userStore.sessionID);
       if (userInfo.code === 200) {
         userStore.setUserInfo(userInfo.data);
+        usersStore.addUser(userInfo.data);
       }
       // step2 获取用户通讯录
       const contacts = await getContacts(userStore.sessionID);

@@ -1,17 +1,16 @@
 import { defineStore } from "pinia";
 
 import { UserInfo, Contact, Group, Chat } from "@/types";
+import { info } from "@/services/userService";
 
 const useUserStore = defineStore({
   id: "user",
   state: (): { userInfo: UserInfo; sessionID?: string } => {
     return {
       userInfo: {
+        _id: "",
         username: undefined,
-        password: undefined,
         avatar: undefined,
-        createdAt: undefined,
-        updatedAt: undefined,
       },
       sessionID: undefined,
     };
@@ -108,21 +107,63 @@ const useChatsStore = defineStore({
   },
 });
 
+/**
+ * @desc 请使用getUserById方法用用户id获取用户信息，如果不存在会自动向服务器获取。
+ * 也能够使用addUser方法强制新增用户信息。
+ */
+const useUsersStore = defineStore({
+  id: "users",
+  state: (): { users: Record<string, UserInfo> } => {
+    return { users: {} };
+  },
+  getters: {},
+  actions: {
+    addUser(userInfo: UserInfo) {
+      this.users[userInfo._id] = userInfo;
+    },
+    async getUserById(userId: string) {
+      if (this.users[userId]) {
+        return this.users[userId];
+      } else {
+        const sessionID = useUserStore().sessionID;
+        const res = await info(sessionID!, userId);
+        if (res.code === 200) {
+          this.addUser(res.data);
+          return this.users[userId];
+        } else {
+          return null;
+        }
+      }
+    },
+  },
+  persist: {
+    key: "users",
+    storage: window.localStorage,
+    // serializer:{
+    //   deserialize:"",
+    //   serialize:
+    // }
+  },
+});
+
 // 当前联系人面板信息
 const useCurrentContactStore = defineStore({
   id: "currentContact",
   state: () => ({
-    _id: ""
+    _id: "",
   }),
   actions: {
     toggleId(_id: string) {
-      this._id = _id
-    }
+      this._id = _id;
+    },
   },
-  persist: {
-    key: "currentContact",
-    storage: window.localStorage
-  }
-})
+});
 
-export { useUserStore, useContactsStore, useGroupsStore, useChatsStore, useCurrentContactStore };
+export {
+  useUserStore,
+  useContactsStore,
+  useGroupsStore,
+  useChatsStore,
+  useUsersStore,
+  useCurrentContactStore,
+};
