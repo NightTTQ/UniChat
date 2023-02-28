@@ -17,8 +17,7 @@ const callbackInfo: CallbackInfo[] = [
   {
     labelname: "好友",
     callback: () => {
-      router.push({ name: "friend" }),
-      console.log(1)
+      router.push({ name: "friend" })
     },
     name: "friend"
   },
