@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 import router from "@/router";
 import { useUserStore } from "@/stores";
-import { Chat, Message, Response } from "@/types";
+import { Chat, Message, Response, LocalMessage } from "@/types";
 
 const events = {
   verifySession: "verifySession",
@@ -81,8 +81,31 @@ function getMessage(
   });
 }
 
-function sendMessage(message: any) {
-  socket.emit(events.sendMessage, message);
+/**
+ * @desc 向服务器发送新消息
+ * @param message 需要发送的消息
+ * @param type 房间类型
+ */
+function sendMessage(message: LocalMessage, type: number): Promise<Message> {
+  return new Promise((resolve, reject) => {
+    socket.emit(
+      events.sendMessage,
+      {
+        type: type,
+        roomId: message.roomId,
+        msgType: message.msgType,
+        content: message.content,
+        replyId: message.replyId,
+      },
+      (res: Response<Message>) => {
+        if (res.code === 200) {
+          resolve(res.data);
+        } else {
+          reject(res);
+        }
+      }
+    );
+  });
 }
 
 /**

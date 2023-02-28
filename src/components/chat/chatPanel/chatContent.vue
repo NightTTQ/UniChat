@@ -31,6 +31,12 @@ const messageLoading = ref(false);
 
 const props = defineProps<{ chat: Chat }>();
 
+/**
+ * @desc 更新展示消息列表。需保证更新列表为有序状态
+ * @param newMessages 需要加入展示列表的消息
+ * @param reverse 是否将新列表加在原列表前面
+ * @param fullUpdate 是否为全量更新
+ */
 const updateMessages = async (
   newMessages: LocalMessage[],
   reverse: boolean = false,
@@ -39,13 +45,15 @@ const updateMessages = async (
   messageLoading.value = true;
 
   for (const message of newMessages) {
-    await usersStore.getUserById(message.fromId);
+    if (!message.status) await usersStore.getUserById(message.fromId);
   }
   if (fullUpdate) messages.value = newMessages;
   else if (reverse) messages.value.unshift(...newMessages);
   else messages.value.push(...newMessages);
   messageLoading.value = false;
 };
+
+defineExpose({ messages, updateMessages });
 
 watch(
   () => props.chat,

@@ -10,11 +10,18 @@
     </div>
     <div class="bubble">
       <div class="sender-text">{{ senderName }}</div>
-      <div class="content">{{ message.content }}</div>
+      <div v-if="message.msgType === 1" class="content-text">
+        {{ message.content }}
+      </div>
+    </div>
+    <div class="icons">
+      <n-spin v-if="message.status === 1" class="loading" />
+      <Checkmark v-else class="check" />
     </div>
   </div>
 </template>
 <script lang="ts" setup>
+import { Checkmark } from "@vicons/ionicons5";
 import { LocalMessage } from "@/types";
 
 const props = defineProps<{
@@ -45,7 +52,20 @@ const props = defineProps<{
     .sender-text {
       font-weight: bold;
     }
-    .content {
+    .content-text {
+      white-space: pre-wrap;
+    }
+  }
+  .icons {
+    align-self: flex-end;
+    .loading {
+      width: 24px;
+      height: 24px;
+    }
+    .check {
+      width: 24px;
+      height: 24px;
+      color: var(--primary-color);
     }
   }
 }

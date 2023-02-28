@@ -44,7 +44,7 @@ declare type Message = {
   /**@desc 发送者_id */
   fromId: string;
   /**@desc 回复消息_Id */
-  replyId: string;
+  replyId?: string;
   /**@desc 消息类型。1纯文本，2纯图片，3富文本。后续添加文件等消息类别 */
   msgType: number;
   // 消息主体
@@ -60,6 +60,8 @@ declare type Message = {
 declare type LocalMessage = Message & {
   prev?: string;
   next?: string;
+  /** @desc 本地消息记录状态。为空或0时代表与云端同步，1发送中，2发送失败 */
+  status?: number;
 };
 
 // 响应体 T

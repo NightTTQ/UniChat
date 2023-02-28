@@ -234,5 +234,5 @@ async function getMessages(
   return res;
 }
 
-export { getMessages };
-export default { getMessages };
+export { getMessages, messagePersistence };
+export default { getMessages, messagePersistence };
