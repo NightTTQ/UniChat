@@ -72,6 +72,6 @@ onMounted(init);
 }
 
 .active button {
-  border-bottom: 2px solid blue;
+  border-bottom: 2px solid var(--primary-color);
 }
 </style>
