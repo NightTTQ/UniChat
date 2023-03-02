@@ -21,7 +21,13 @@
             : groups[item.roomId]?.groupName
         "
         :last-message="item.lastMessage"
-        :from-user="''"
+        :from-user="
+          item.type !== 1 &&
+          item.lastMessage?.fromId !== userInfo._id &&
+          item.lastMessage
+            ? users[item.lastMessage.fromId].username
+            : ''
+        "
         :active="item === curChat"
         @select="select"
       />
@@ -32,7 +38,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useContactsStore, useGroupsStore } from "@/stores";
+import {
+  useUsersStore,
+  useContactsStore,
+  useGroupsStore,
+  useUserStore,
+} from "@/stores";
 
 import ListItem from "./listItem.vue";
 import { Chat } from "@/types";
@@ -43,6 +54,8 @@ const emit = defineEmits<{
 }>();
 const curChat = ref<Chat>();
 
+const userInfo = storeToRefs(useUserStore()).userInfo;
+const users = storeToRefs(useUsersStore()).users;
 const contacts = storeToRefs(useContactsStore()).contacts;
 const groups = storeToRefs(useGroupsStore()).groups;
 

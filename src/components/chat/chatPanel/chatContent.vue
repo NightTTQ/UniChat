@@ -32,7 +32,7 @@ const messageLoading = ref(false);
 const props = defineProps<{ chat: Chat }>();
 
 /**
- * @desc 更新展示消息列表。需保证更新列表为有序状态
+ * @desc 更新展示消息列表。建议更新列表为有序状态
  * @param newMessages 需要加入展示列表的消息
  * @param reverse 是否将新列表加在原列表前面
  * @param fullUpdate 是否为全量更新
@@ -43,13 +43,41 @@ const updateMessages = async (
   fullUpdate: boolean = false
 ) => {
   messageLoading.value = true;
-
   for (const message of newMessages) {
+    // 新消息中的发送用户信息在本地缺失，先向服务器查询用户信息
     if (!message.status) await usersStore.getUserById(message.fromId);
   }
-  if (fullUpdate) messages.value = newMessages;
-  else if (reverse) messages.value.unshift(...newMessages);
-  else messages.value.push(...newMessages);
+  let unOrder = false;
+  if (fullUpdate) {
+    // 强制全量更新，不排序
+    messages.value = newMessages;
+    messageLoading.value = false;
+    return;
+  } else if (reverse) {
+    // 反转更新，将新消息放在数组前
+    messages.value.unshift(...newMessages);
+    // 合并处数据无序，需要整体排序
+    if (
+      messages.value.length > newMessages.length &&
+      newMessages[newMessages.length - 1].createdAt >
+        messages.value[newMessages.length].createdAt
+    )
+      unOrder = true;
+  } else {
+    // 合并处数据无序，需要整体排序
+    if (
+      newMessages.length &&
+      messages.value.length &&
+      messages.value[messages.value.length - 1].createdAt >
+        newMessages[0].createdAt
+    )
+      unOrder = true;
+    // 正常更新。将新消息放在数组后
+    messages.value.push(...newMessages);
+  }
+  if (unOrder) {
+    messages.value.sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
+  }
   messageLoading.value = false;
 };
 

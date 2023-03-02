@@ -3,12 +3,17 @@ import { io } from "socket.io-client";
 import router from "@/router";
 import { useUserStore } from "@/stores";
 import { Chat, Message, Response, LocalMessage } from "@/types";
+import { messagePersistence } from "@/services/messageService";
 
 const events = {
   verifySession: "verifySession",
+  receiveMessage: "receiveMessage",
   getMessage: "getMessage",
   sendMessage: "sendMessage",
   unreadMessage: "unreadMessage",
+};
+const hooks: Record<string, (...args: any) => void> = {
+  receiveMessage: () => {},
 };
 const userStore = useUserStore();
 
@@ -16,33 +21,48 @@ const socket = io({
   path: "/ws/chat",
   transports: ["websocket", "polling"],
 });
-let verified = new Promise((resolve) => {
-  verifySession(resolve);
+/** @desc 一个promise对象，代表当前连接是否已完成鉴权。如果操作需要鉴权，请务必先await此对象 */
+let verified = new Promise((resolve, reject) => {
+  verifySession(resolve, reject);
 });
 
-function verifySession(resolve: any) {
+function verifySession(resolve: any, reject: any) {
   socket.emit(
     events.verifySession,
     { sessionID: userStore.sessionID },
     (data: any) => {
       if (data.code === 200) {
+        console.log("verifySession OK");
         resolve();
+      } else {
+        reject(data);
       }
     }
   );
 }
-
 socket.on("disconnect", (reason) => {
   console.log(reason);
-  verified = new Promise((resolve) => {
-    verifySession(resolve);
+  verified = new Promise((resolve, reject) => {
+    verifySession(resolve, reject);
   });
 });
-
-socket.on(events.verifySession, (data) => {
+socket.on(events.verifySession, (data: Response<null>) => {
   if (data.code !== 200) {
     router.push({ name: "logout" });
   }
+});
+
+/**
+ * @desc 接收到服务器推送的新消息。
+ * @param message 接收到的新消息
+ * @param type 消息所属房间类型
+ */
+async function receiveMessage(message: Message, type: number) {
+  const localMessages = await messagePersistence([message], type);
+  if (hooks.receiveMessage) hooks.receiveMessage(localMessages[0], type);
+}
+socket.on(events.receiveMessage, (data: { message: Message; type: number }) => {
+  receiveMessage(data.message, data.type);
 });
 
 /**
@@ -62,10 +82,8 @@ function getMessage(
   startId?: string,
   limit?: number
 ): Promise<Message[]> {
-  return new Promise((resolve, reject) => {
-    const reciveMessage = (res: Response<Message[]>) => {
-      resolve(res.data);
-    };
+  return new Promise(async (resolve, reject) => {
+    await verified;
     socket.emit(
       events.getMessage,
       {
@@ -76,7 +94,9 @@ function getMessage(
         startId: startId,
         limit: limit,
       },
-      reciveMessage
+      (res: Response<Message[]>) => {
+        resolve(res.data);
+      }
     );
   });
 }
@@ -128,5 +148,13 @@ function getUnreadMessage(cb: (chat: Chat) => void) {
   });
 }
 
-export { getMessage, sendMessage, getUnreadMessage };
-export default { getMessage, sendMessage, getUnreadMessage };
+/**
+ * @desc 监听服务器推送的新消息（全局只允许绑定一个回调函数）
+ * @param cb 监听回调函数
+ */
+function listenNewMessage(cb: (message: LocalMessage, type: number) => void) {
+  hooks.receiveMessage = cb;
+}
+
+export { getMessage, sendMessage, getUnreadMessage, listenNewMessage };
+export default { getMessage, sendMessage, getUnreadMessage, listenNewMessage };

@@ -33,7 +33,7 @@ declare type Chat = {
   avatar: string;
   name: string;
   lastSeenMessageId?: string;
-  lastMessage?: Message;
+  lastMessage?: LocalMessage;
   userId?: string;
 };
 

@@ -13,7 +13,12 @@
 import { ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 
-import { useUserStore, useContactsStore, useGroupsStore } from "@/stores";
+import {
+  useUserStore,
+  useContactsStore,
+  useGroupsStore,
+  useChatsStore,
+} from "@/stores";
 import { Chat, LocalMessage } from "@/types";
 import { sendMessage } from "@/services/chatService";
 import { messagePersistence } from "@/services/messageService";
@@ -24,6 +29,7 @@ import ChatInput from "./chatInput.vue";
 const props = defineProps<{ chat: Chat }>();
 
 const userStore = useUserStore();
+const chatsStore = useChatsStore();
 const contacts = storeToRefs(useContactsStore()).contacts;
 const groups = storeToRefs(useGroupsStore()).groups;
 const contentRef = ref<InstanceType<typeof ChatContent>>();
@@ -52,17 +58,14 @@ const sendNewMessage = async (message: string) => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+  // 更新会话信息，展示正在发送的最新消息
+  chatsStore.updateLastMessage(props.chat, tmpMessage);
   // 将正在发送的消息放入展示数组
   contentRef.value!.updateMessages([tmpMessage], false, false);
   sendMessage(tmpMessage, props.chat.type)
     .then(async (message) => {
       // 发送成功，根据服务器返回进行本地序列化
       const unlinkMessages = [message];
-      const index = contentRef.value!.messages.indexOf(tmpMessage);
-      if (index) {
-        // 新消息不是第一条消息，能够与前一条消息链表化
-        unlinkMessages.unshift(contentRef.value!.messages[index - 1]);
-      }
       // 已序列化的消息
       const localMessages = await messagePersistence(
         unlinkMessages,
@@ -72,6 +75,12 @@ const sendNewMessage = async (message: string) => {
       contentRef.value!.messages[
         contentRef.value!.messages.indexOf(tmpMessage)
       ] = localMessages[localMessages.length - 1];
+
+      tmpMessage.status = 0;
+      chatsStore.updateLastMessage(
+        props.chat,
+        localMessages[localMessages.length - 1]
+      );
     })
     .catch((err) => {
       // 发生错误
@@ -86,6 +95,21 @@ const sendNewMessage = async (message: string) => {
       }, 5000);
     });
 };
+
+defineExpose({
+  /**
+ * @desc 更新展示消息列表。建议更新列表为有序状态。
+ * 只有面板展示的房间与新消息所属房间一致时才会更新。
+ * @param newMessages 需要加入展示列表的消息
+ * @param reverse 是否将新列表加在原列表前面
+ * @param fullUpdate 是否为全量更新
+ */
+  updateMessages: (
+    newMessages: LocalMessage[],
+    reverse: boolean = false,
+    fullUpdate: boolean = false
+  ) => contentRef.value?.updateMessages(newMessages, reverse, fullUpdate),
+});
 </script>
 
 <style scoped>

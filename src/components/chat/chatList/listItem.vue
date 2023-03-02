@@ -7,7 +7,7 @@
       <n-h3 class="name-text">{{ name }}</n-h3>
       <n-p class="last-message">{{
         fromUser
-          ? `${fromUser}:${lastMessage?.content}`
+          ? `${fromUser}: ${lastMessage?.content}`
           : `${lastMessage?.content}`
       }}</n-p>
     </div>
@@ -15,14 +15,14 @@
 </template>
 
 <script setup lang="ts">
-import { Message } from "@/types";
+import { LocalMessage } from "@/types";
 
 const props = defineProps<{
   avatar: string;
   name: string;
   roomId: string;
   type: number;
-  lastMessage?: Message;
+  lastMessage?: LocalMessage;
   fromUser?: string;
   active: boolean;
 }>();
