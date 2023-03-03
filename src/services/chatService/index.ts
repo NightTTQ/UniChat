@@ -11,6 +11,7 @@ const events = {
   getMessage: "getMessage",
   sendMessage: "sendMessage",
   unreadMessage: "unreadMessage",
+  readMessage: "readMessage",
 };
 const hooks: Record<string, (...args: any) => void> = {
   receiveMessage: () => {},
@@ -129,6 +130,37 @@ function sendMessage(message: LocalMessage, type: number): Promise<Message> {
 }
 
 /**
+ * @desc 向服务器发送已读时间
+ * @param readTime 已读时间
+ * @param roomId 消息所属房间id
+ * @param type 消息所属房间类型
+ * @returns 服务器保存的已读时间（字符串形式）
+ */
+function readMessage(
+  readTime: Date,
+  roomId: string,
+  type: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    socket.emit(
+      events.readMessage,
+      {
+        type: type,
+        roomId: roomId,
+        readTime: readTime,
+      },
+      (res: Response<string>) => {
+        if (res.code === 200) {
+          resolve(res.data);
+        } else {
+          reject(res);
+        }
+      }
+    );
+  });
+}
+
+/**
  * @desc 获取未读消息（全局只允许绑定一个回调函数）
  * @param cb 监听回调函数
  */
@@ -156,5 +188,17 @@ function listenNewMessage(cb: (message: LocalMessage, type: number) => void) {
   hooks.receiveMessage = cb;
 }
 
-export { getMessage, sendMessage, getUnreadMessage, listenNewMessage };
-export default { getMessage, sendMessage, getUnreadMessage, listenNewMessage };
+export {
+  getMessage,
+  sendMessage,
+  getUnreadMessage,
+  listenNewMessage,
+  readMessage,
+};
+export default {
+  getMessage,
+  sendMessage,
+  getUnreadMessage,
+  listenNewMessage,
+  readMessage,
+};

@@ -96,6 +96,9 @@ const useChatsStore = defineStore({
         item.lastMessage.createdAt = new Date(item.lastMessage.createdAt);
         item.lastMessage.updatedAt = new Date(item.lastMessage.updatedAt);
       }
+      if (item.lastSeenReadTime) {
+        item.lastSeenReadTime = new Date(item.lastSeenReadTime);
+      }
       const index = this.chats.findIndex(
         (chat) => chat.roomId === item.roomId && chat.type === chat.type
       );
