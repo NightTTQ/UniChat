@@ -43,6 +43,10 @@ const props = defineProps<{
   container?: Element;
 }>();
 
+nextTick(() => {
+  document.querySelector(".content")?.scrollIntoView(false);
+});
+
 const emit = defineEmits<{
   (event: "visible", message: LocalMessage): void;
   (event: "invisible", message: LocalMessage): void;

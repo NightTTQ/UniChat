@@ -208,11 +208,27 @@ watch(
   justify-content: end;
   position: relative;
   .content {
+    height: 100%;
     padding: 1em;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     row-gap: 1em;
+    overflow-y: hidden;
+  }
+
+  .scroll-bar {
+    position: absolute;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    border-radius: 2px;
+    background-color: white;
+
+    .scroll-thumb {
+      width: 10px;
+
+      background-color: aqua;
+    }
   }
 }
 </style>
