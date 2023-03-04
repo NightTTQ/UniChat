@@ -36,10 +36,10 @@ async function messagePersistence(messages: Message[], type: number) {
       if (pre) {
         pre.next = cur._id;
         if (type === 1) {
-          userMessageDB.setItem(localMessages[i]._id, pre);
+          userMessageDB.setItem(pre._id, pre);
         }
         if (type === 2) {
-          groupMessageDB.setItem(localMessages[i]._id, pre);
+          groupMessageDB.setItem(pre._id, pre);
         }
       }
     } else {
@@ -49,10 +49,10 @@ async function messagePersistence(messages: Message[], type: number) {
       if (pre) {
         pre.next = cur._id;
         if (type === 1) {
-          userMessageDB.setItem(localMessages[i]._id, pre);
+          userMessageDB.setItem(pre._id, pre);
         }
         if (type === 2) {
-          groupMessageDB.setItem(localMessages[i]._id, pre);
+          groupMessageDB.setItem(pre._id, pre);
         }
       }
     }
@@ -60,10 +60,10 @@ async function messagePersistence(messages: Message[], type: number) {
   }
   if (pre) {
     if (type === 1) {
-      userMessageDB.setItem(localMessages[localMessages.length - 1]._id, pre);
+      userMessageDB.setItem(pre._id, pre);
     }
     if (type === 2) {
-      groupMessageDB.setItem(localMessages[localMessages.length - 1]._id, pre);
+      groupMessageDB.setItem(pre._id, pre);
     }
   }
   return localMessages;
@@ -97,7 +97,8 @@ async function getLocalMessage(
  * @param searchDir 搜索方向
  * @param startAt 开始查询的时间
  * @param startId 开始查询的消息id
- * @returns 正序排序的本地聊天记录数组
+ * @param limit 一次查询的条数
+ * @returns 正序排序的本地聊天记录数组。不会包含自动添加的1条记录
  */
 async function getRemoteMessage(
   roomId: string,
@@ -107,16 +108,22 @@ async function getRemoteMessage(
   startId?: string,
   limit?: number
 ): Promise<LocalMessage[]> {
+  const _limit = limit ? Math.abs(limit) + 1 : 21;
   const messages = await getMessage(
     roomId,
     type,
     searchDir,
     startAt,
     startId,
-    limit ? Math.abs(limit) + 1 : undefined
+    _limit
   );
   if (Array.isArray(messages)) {
-    return await messagePersistence(messages, type);
+    const localMessages = await messagePersistence(messages, type);
+    if (searchDir === 1) {
+      return localMessages.slice(0, _limit - 1);
+    } else {
+      return localMessages.slice(1, _limit);
+    }
   } else {
     throw new Error("Error");
   }
@@ -129,20 +136,24 @@ async function getRemoteMessage(
  * @param limit 一次查询的条数。默认20最大100
  * @param type 查询消息所在的聊天类别
  * @param messageId 查询消息记录的锚点记录id。不存在时则从第一条消息记录开始查询
+ * @param startAt 查询消息记录的锚点时间
  */
 async function getMessages(
   roomId: string,
   type: number,
   searchDir: 1 | -1,
   limit?: number,
-  messageId?: string
+  messageId?: string,
+  startAt?: Date
 ): Promise<LocalMessage[]> {
+  // 为true时代表服务器也没有更多记录了，获取终止
+  let done = false;
   const res: LocalMessage[] = [];
   const _limit = limit ? Math.min(Math.abs(limit), 100) : 20;
   if (messageId) {
-    // 存在锚点记录id，本地和云端至少有一个阅读记录，先尝试从本地开始读取
+    // 存在锚点记录id，本地有阅读记录，先尝试从本地开始读取
     let curId: string | null = messageId;
-    while (res.length < _limit) {
+    while (res.length < _limit && !done) {
       if (curId) {
         // 有消息记录id，尝试在本地读取
         const localMessage: LocalMessage | null = await getLocalMessage(
@@ -171,6 +182,8 @@ async function getMessages(
             curId,
             _limit - res.length
           );
+          // 服务器返回的消息条数小于请求的条数，说明服务器没有更多消息了
+          if (messages.length < _limit - res.length) done = true;
           if (searchDir === 1) {
             res.push(...messages);
             curId = res[res.length - 1].next || null;
@@ -197,33 +210,42 @@ async function getMessages(
             undefined,
             _limit - res.length
           );
+          // 服务器返回的消息条数小于请求的条数，说明服务器没有更多消息了
+          if (messages.length < _limit - res.length) done = true;
+          // 从服务器返回的消息记录中找到与本地消息记录相连的消息记录id，需要去重
+          if (prevMessage._id === messages[0]?._id) messages.shift();
           res.push(...messages);
-          curId = messages[messages.length - 1]._id;
+          curId = messages[messages.length - 1]?._id;
           continue;
         }
         if (searchDir === -1) {
-          const prevMessage = res[0];
+          const nextMessage = res[0];
           const messages = await getRemoteMessage(
             roomId,
             type,
             searchDir,
-            prevMessage.createdAt,
+            nextMessage.createdAt,
             undefined,
             _limit - res.length
           );
+          // 服务器返回的消息条数小于请求的条数，说明服务器没有更多消息了
+          if (messages.length < _limit - res.length) done = true;
+          // 从服务器返回的消息记录中找到与本地消息记录相连的消息记录id，需要去重
+          if (nextMessage._id === messages[messages.length - 1]?._id)
+            messages.pop();
           res.unshift(...messages);
-          curId = messages[0]._id;
+          curId = messages[0]?._id;
           continue;
         }
       }
     }
   } else {
-    // 不存在锚点记录id，说明云端也没有阅读记录，从头开始获取
+    // 不存在锚点记录id，根据锚点时间向服务器请求
     const messages = await getRemoteMessage(
       roomId,
       type,
       searchDir,
-      new Date(0),
+      startAt || new Date(0),
       undefined,
       _limit - res.length
     );
@@ -234,5 +256,5 @@ async function getMessages(
   return res;
 }
 
-export { getMessages };
-export default { getMessages };
+export { getMessages, messagePersistence };
+export default { getMessages, messagePersistence };

@@ -18,6 +18,20 @@ async function getList(sessionID: string) {
   });
   return data;
 }
+/**
+ * @desc 获取群聊信息
+ * @param sessionID 用户的sessionID
+ * @param roomId 需要查询的群聊roomId
+ */
+async function getGroupInfo(
+  sessionID: string,
+  roomId: string
+): Promise<Response<Group>> {
+  const { data } = await request.get<Response<Group>>(api.list, {
+    params: { sessionID: sessionID, roomId: roomId },
+  });
+  return data;
+}
 
 /**
  * @desc 获取用户的群申请列表
@@ -32,7 +46,7 @@ async function getRequest(
   status?: number,
   skip?: number,
   limit?: number
-){
+) {
   const { data } = await request.get<Response<Group[]>>(api.request, {
     params: { sessionID: sessionID, status: status, skip: skip, limit: limit },
   });
@@ -105,6 +119,7 @@ async function quitGroup(sessionID: string, roomId: string) {
 
 export {
   getList,
+  getGroupInfo,
   getRequest,
   postRequest,
   handleRequest,
@@ -113,6 +128,7 @@ export {
 };
 export default {
   getList,
+  getGroupInfo,
   getRequest,
   postRequest,
   handleRequest,

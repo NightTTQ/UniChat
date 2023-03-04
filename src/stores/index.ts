@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-import { UserInfo, Contact, Group, Chat } from "@/types";
+import { UserInfo, Contact, Group, Chat, LocalMessage } from "@/types";
 import { info } from "@/services/userService";
 
 const useUserStore = defineStore({
@@ -83,6 +83,7 @@ const useGroupsStore = defineStore({
   },
 });
 
+/** @desc 会话列表 */
 const useChatsStore = defineStore({
   id: "chats",
   state: (): { chats: Chat[] } => {
@@ -91,19 +92,59 @@ const useChatsStore = defineStore({
   getters: {},
   actions: {
     addChat(item: Chat) {
+      if (item.lastMessage) {
+        item.lastMessage.createdAt = new Date(item.lastMessage.createdAt);
+        item.lastMessage.updatedAt = new Date(item.lastMessage.updatedAt);
+      }
+      if (item.lastSeenReadTime) {
+        item.lastSeenReadTime = new Date(item.lastSeenReadTime);
+      }
       const index = this.chats.findIndex(
         (chat) => chat.roomId === item.roomId && chat.type === chat.type
       );
       if (index !== -1) {
+        // 本地有会话缓存，需要判断是否有本地会话未发送完成的信息。TODO：支持重发
+        const existMessage = this.chats[index].lastMessage;
+        if (existMessage?.status === 2) item.lastMessage = existMessage;
         this.chats[index] = item;
       } else {
         this.chats.push(item);
+      }
+    },
+    /**
+     * @desc 更新会话的最后一条消息。用于列表预览
+     * @param chat 需要更新的会话。只包含roomId和type即可。
+     * @param message 最新的最后一条消息。若原消息比新消息更新则不会替换
+     */
+    updateLastMessage(chat: Chat, message: LocalMessage) {
+      const room = this.chats.find(
+        (item) => item.roomId === chat.roomId && item.type === chat.type
+      );
+      if (room) {
+        if (room.lastMessage) {
+          if (message.status === 1) {
+            // 新消息是在发送中的消息，优先级最高直接替换
+            room.lastMessage = message;
+          } else if (room.lastMessage.status === 1) {
+            // 新消息是服务器推送，同时会话有正在发送的消息，不替换
+          } else {
+            // 会话没有正在发送的消息，新消息正常替换
+            if (room.lastMessage.createdAt < message.createdAt)
+              room.lastMessage = message;
+          }
+        } else {
+          // 会话没有最后一条消息，直接将此消息作为最后一条消息
+          room.lastMessage = message;
+        }
       }
     },
   },
   persist: {
     key: "chats",
     storage: window.localStorage,
+    afterRestore: (ctx) => {
+      // console.log(ctx.store.$state);
+    },
   },
 });
 

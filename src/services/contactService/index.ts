@@ -1,6 +1,6 @@
 import request from "@/services/axios/request";
 
-import { Response, Contact } from "@/types";
+import { Response, Contact, Chat } from "@/types";
 
 const api = {
   list: "/contact/list",
@@ -86,13 +86,16 @@ async function deleteContact(sessionID: string, targetId: string) {
 }
 
 /**
- * @desc 获取联系人详细信息
+ * @desc 获取私聊房间详细信息
  * @param sessionID 用户的sessionID
- * @param userId 需要查询的用户id
+ * @param roomId 需要查询的房间id
  */
-async function getContactInfo(sessionID: string, userId: string) {
+async function getContactInfo(
+  sessionID: string,
+  roomId: string
+): Promise<Response<Chat>> {
   const { data } = await request.get(api.info, {
-    params: { sessionID: sessionID, userId: userId },
+    params: { sessionID: sessionID, roomId: roomId },
   });
   return data;
 }
