@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 
 import { UserInfo, Contact, Group, Chat, LocalMessage } from "@/types";
+import { serializeChat, deserializeChat } from "@/utils/serializer";
 import { info } from "@/services/userService";
 
 const useUserStore = defineStore({
@@ -142,8 +143,9 @@ const useChatsStore = defineStore({
   persist: {
     key: "chats",
     storage: window.localStorage,
-    afterRestore: (ctx) => {
-      // console.log(ctx.store.$state);
+    serializer: {
+      serialize: serializeChat,
+      deserialize: deserializeChat,
     },
   },
 });

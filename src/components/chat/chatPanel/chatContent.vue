@@ -1,19 +1,19 @@
 <template>
   <div class="content-wrapper">
-   <n-scrollbar>
-    <div class="content" ref="contentRef">
-      <div v-for="message of messages" ref="bubblesRef">
-        <Bubble
-          :message="message"
-          :is-user-send="userInfo._id === message.fromId"
-          :sender-avatar="users[message.fromId]?.avatar || ''"
-          :sender-name="users[message.fromId]?.username || message.fromId"
-          :container="contentRef"
-          @visible="updateReadTime"
-        />
+    <n-scrollbar>
+      <div class="content" ref="contentRef">
+        <div v-for="message of messages" ref="bubblesRef">
+          <Bubble
+            :message="message"
+            :is-user-send="userInfo._id === message.fromId"
+            :sender-avatar="users[message.fromId]?.avatar || ''"
+            :sender-name="users[message.fromId]?.username || message.fromId"
+            :container="contentRef"
+            @visible="updateReadTime"
+          />
+        </div>
       </div>
-    </div>
-   </n-scrollbar>
+    </n-scrollbar>
   </div>
 </template>
 
@@ -64,6 +64,7 @@ const updateReadTime = (message: LocalMessage) => {
       !props.chat.lastSeenReadTime ||
       lastTime.value > props.chat.lastSeenReadTime
     ) {
+      props.chat.unreadCount = Math.max(props.chat.unreadCount - 1, 0);
       throttleToServer(message);
     }
   }
