@@ -32,6 +32,8 @@ declare type Chat = {
   roomId: string;
   avatar: string;
   name: string;
+  /** @desc 未读消息数 */
+  unreadCount: number;
   /** @desc 由服务器提供的最后阅读时间 */
   lastSeenReadTime?: Date;
   /** @desc 由客户端维护的最后阅读消息id，若此id存在，则说明本地已经存在了未读消息附近的消息记录 */

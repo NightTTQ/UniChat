@@ -4,17 +4,28 @@
       <img class="img" draggable="false" :src="avatar" />
     </div>
     <div class="text-area">
-      <n-h3 class="name-text">{{ name }}</n-h3>
-      <n-p class="last-message">{{
-        fromUser
-          ? `${fromUser}: ${lastMessage?.content}`
-          : `${lastMessage?.content}`
-      }}</n-p>
+      <div class="first-line">
+        <n-h3 class="chat-name"> {{ name }}</n-h3>
+        <div class="last-time" v-if="lastMessage">
+          {{ format(lastMessage.createdAt, "HH:mm") }}
+        </div>
+      </div>
+
+      <div class="second-line">
+        <n-p class="last-message">{{
+          fromUser
+            ? `${fromUser}: ${lastMessage?.content}`
+            : `${lastMessage?.content}`
+        }}</n-p>
+        <div class="unread-count" v-if="unreadCount">{{ unreadCount }}</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { format } from "date-fns";
+
 import { LocalMessage } from "@/types";
 
 const props = defineProps<{
@@ -22,6 +33,7 @@ const props = defineProps<{
   name: string;
   roomId: string;
   type: number;
+  unreadCount?: number;
   lastMessage?: LocalMessage;
   fromUser?: string;
   active: boolean;
@@ -66,15 +78,38 @@ const select = () => {
     flex: 1;
     flex-direction: column;
     justify-content: center;
-    .name-text {
-      margin: 0;
+    .first-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      column-gap: 1em;
+      .chat-name {
+        margin: 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
     }
-    .last-message {
-      margin: 0;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      opacity: 0.8;
+    .second-line {
+      display: flex;
+      justify-content: space-between;
+      column-gap: 1em;
+      .unread-count {
+        border-radius: 9999rem;
+        height: 1.5em;
+        display: flex;
+        align-items: center;
+        padding: 0 0.5em;
+        font-size: small;
+        background-color: var(--primary-color);
+      }
+      .last-message {
+        margin: 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        opacity: 0.8;
+      }
     }
   }
 }

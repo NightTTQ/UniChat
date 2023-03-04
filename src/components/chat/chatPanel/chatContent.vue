@@ -62,6 +62,7 @@ const updateReadTime = (message: LocalMessage) => {
       !props.chat.lastSeenReadTime ||
       lastTime.value > props.chat.lastSeenReadTime
     ) {
+      props.chat.unreadCount = Math.max(props.chat.unreadCount - 1, 0);
       throttleToServer(message);
     }
   }
