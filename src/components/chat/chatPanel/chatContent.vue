@@ -1,5 +1,6 @@
 <template>
   <div class="content-wrapper">
+   <n-scrollbar>
     <div class="content" ref="contentRef">
       <div v-for="message of messages" ref="bubblesRef">
         <Bubble
@@ -12,6 +13,7 @@
         />
       </div>
     </div>
+   </n-scrollbar>
   </div>
 </template>
 

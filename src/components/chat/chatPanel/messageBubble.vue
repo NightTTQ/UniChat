@@ -44,7 +44,12 @@ const props = defineProps<{
 }>();
 
 nextTick(() => {
-  document.querySelector(".content")?.scrollIntoView(false);
+  if (props.isUserSend) {
+    console.log("自己的消息滑动")
+    document.querySelector(".content")?.scrollIntoView(false);
+  } else {
+    console.log("别人新消息不滑")
+  }
 });
 
 const emit = defineEmits<{
