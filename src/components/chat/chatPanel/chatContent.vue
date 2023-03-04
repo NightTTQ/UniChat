@@ -1,20 +1,22 @@
 <template>
   <div class="content-wrapper">
-    <div class="content">
-      <div v-for="message of messages">
-        <Bubble
-          :message="message"
-          :is-user-send="userInfo._id === message.fromId"
-          :sender-avatar="users[message.fromId]?.avatar || ''"
-          :sender-name="users[message.fromId]?.username || message.fromId"
-        />
+    <n-scrollbar>
+      <div class="content">
+        <div v-for="message of messages">
+          <Bubble
+            :message="message"
+            :is-user-send="userInfo._id === message.fromId"
+            :sender-avatar="users[message.fromId]?.avatar || ''"
+            :sender-name="users[message.fromId]?.username || message.fromId"
+          />
+        </div>
       </div>
-    </div>
+    </n-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, watch } from "vue";
+import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 
 import Bubble from "./messageBubble.vue";
@@ -68,7 +70,7 @@ watch(
         20,
         chat.lastSeenMessageId
       );
-      updateMessages(afterMessages, false, false);
+      updateMessages(afterMessages, false, false)
     } else {
       // 没有上次阅读记录，说明从未阅读过，直接获取全部消息
       const message = await getMessages(chat.roomId, chat.type, 1, 20);
@@ -120,11 +122,27 @@ watch(
   justify-content: end;
   position: relative;
   .content {
+    height: 100%;
     padding: 1em;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     row-gap: 1em;
+    overflow-y: hidden;
+  }
+
+  .scroll-bar {
+    position: absolute;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    border-radius: 2px;
+    background-color: white;
+
+    .scroll-thumb {
+      width: 10px;
+
+      background-color: aqua;
+    }
   }
 }
 </style>

@@ -66,6 +66,7 @@ function getMessage(
     const reciveMessage = (res: Response<Message[]>) => {
       resolve(res.data);
     };
+
     socket.emit(
       events.getMessage,
       {

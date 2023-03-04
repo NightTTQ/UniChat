@@ -15,6 +15,7 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { nextTick } from "vue";
 import { LocalMessage } from "@/types";
 
 const props = defineProps<{
@@ -26,6 +27,10 @@ const props = defineProps<{
   /** @desc 此消息是否是用户自己发送的 */
   isUserSend: boolean;
 }>();
+
+nextTick(() => {
+  document.querySelector(".content")?.scrollIntoView(false);
+});
 </script>
 <style lang="scss" scoped>
 .bubble-wrapper {
