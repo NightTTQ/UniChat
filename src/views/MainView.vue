@@ -113,6 +113,7 @@ onBeforeMount(async () => {
       if (contacts.code === 200 && Array.isArray(contacts.data)) {
         for (const item of contacts.data) {
           contactStore.addContact(item);
+          usersStore.addUser(item);
         }
       }
       // step3 获取用户群聊列表

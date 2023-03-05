@@ -15,7 +15,7 @@
         <n-p class="last-message">{{
           fromUser
             ? `${fromUser}: ${lastMessage?.content}`
-            : `${lastMessage?.content}`
+            : `${lastMessage?.content || ""}`
         }}</n-p>
         <div class="unread-count" v-if="unreadCount">{{ unreadCount }}</div>
       </div>
