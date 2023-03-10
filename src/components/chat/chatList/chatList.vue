@@ -28,6 +28,7 @@
             ? users[item.lastMessage.fromId].username
             : ''
         "
+        :unread-count="item.unreadCount"
         :active="item === curChat"
         @select="select"
       />

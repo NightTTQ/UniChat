@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 
 import { UserInfo, Contact, Group, Chat, LocalMessage } from "@/types";
+import { serializeChat, deserializeChat } from "@/utils/serializer";
 import { info } from "@/services/userService";
 
 const useUserStore = defineStore({
@@ -96,6 +97,9 @@ const useChatsStore = defineStore({
         item.lastMessage.createdAt = new Date(item.lastMessage.createdAt);
         item.lastMessage.updatedAt = new Date(item.lastMessage.updatedAt);
       }
+      if (item.lastSeenReadTime) {
+        item.lastSeenReadTime = new Date(item.lastSeenReadTime);
+      }
       const index = this.chats.findIndex(
         (chat) => chat.roomId === item.roomId && chat.type === chat.type
       );
@@ -139,8 +143,9 @@ const useChatsStore = defineStore({
   persist: {
     key: "chats",
     storage: window.localStorage,
-    afterRestore: (ctx) => {
-      // console.log(ctx.store.$state);
+    serializer: {
+      serialize: serializeChat,
+      deserialize: deserializeChat,
     },
   },
 });
@@ -184,6 +189,29 @@ const useUsersStore = defineStore({
   },
 });
 
+/**
+ * @desc 全局状态
+ */
+const useGlobalStore = defineStore({
+  id: "global",
+  state: () => ({
+    callModal: {
+      show: false,
+      roomId: "",
+      userId: "",
+      /** @desc -1呼入等待0正在呼叫1正在振铃2正在连接3通话中4通话结束5无人接听6拒绝通话 */
+      status: 0,
+      callConfig: { method: "", roomToken: "" },
+      incomeCallBack: (res: { accept: boolean }): void => {},
+    },
+  }),
+  actions: {
+    toggleCallModal() {
+      this.callModal.show = !this.callModal.show;
+    },
+  },
+});
+
 // 当前联系人面板信息
 const useCurrentContactStore = defineStore({
   id: "currentContact",
@@ -203,5 +231,6 @@ export {
   useGroupsStore,
   useChatsStore,
   useUsersStore,
+  useGlobalStore,
   useCurrentContactStore,
 };

@@ -12,14 +12,18 @@
     "@vicons/ionicons5": "^0.12.0",
     "@vicons/utils": "^0.1.4",
     "axios": "^1.2.2",
+    "date-fns": "^2.29.3",
     "localforage": "^1.10.0",
+    "lodash-es": "^4.17.21",
     "pinia": "^2.0.28",
     "pinia-plugin-persistedstate": "^3.0.2",
+    "qnweb-rtc": "^4.2.0",
     "socket.io-client": "^4.5.4",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
+    "@types/lodash-es": "^4.17.6",
     "@types/node": "^18.11.18",
     "@vitejs/plugin-vue": "^4.0.0",
     "naive-ui": "^2.34.3",

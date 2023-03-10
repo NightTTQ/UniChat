@@ -1,26 +1,32 @@
 <template>
   <div class="content-wrapper">
-    <div class="content">
-      <div v-for="message of messages">
-        <Bubble
-          :message="message"
-          :is-user-send="userInfo._id === message.fromId"
-          :sender-avatar="users[message.fromId]?.avatar || ''"
-          :sender-name="users[message.fromId]?.username || message.fromId"
-        />
+    <n-scrollbar>
+      <div class="content" ref="contentRef">
+        <div v-for="message of messages" ref="bubblesRef">
+          <Bubble
+            :message="message"
+            :is-user-send="userInfo._id === message.fromId"
+            :sender-avatar="users[message.fromId]?.avatar || ''"
+            :sender-name="users[message.fromId]?.username || message.fromId"
+            :container="contentRef"
+            @visible="updateReadTime"
+          />
+        </div>
       </div>
-    </div>
+    </n-scrollbar>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onBeforeMount, watch } from "vue";
+import { ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { throttle } from "lodash-es";
 
 import Bubble from "./messageBubble.vue";
 import { Chat, LocalMessage } from "@/types";
 import { useUserStore, useUsersStore } from "@/stores";
 import { getMessages } from "@/services/messageService";
+import { readMessage } from "@/services/chatService";
 
 const userInfo = storeToRefs(useUserStore()).userInfo;
 
@@ -28,8 +34,41 @@ const usersStore = useUsersStore();
 const users = storeToRefs(usersStore).users;
 const messages = ref<LocalMessage[]>([]);
 const messageLoading = ref(false);
+const contentRef = ref<Element>();
+const bubblesRef = ref<Element[]>([]);
+const lastTime = ref<Date>(new Date(0));
 
 const props = defineProps<{ chat: Chat }>();
+
+// 向服务器更新已读时间（节流函数）
+const throttleToServer = throttle(async (message: LocalMessage) => {
+  const chat = props.chat;
+  const res = await readMessage(
+    message.createdAt,
+    message.roomId,
+    props.chat.type
+  );
+  // 更新服务器记录的已读时间
+  chat.lastSeenReadTime = new Date(res);
+}, 1000);
+
+// 更新已读时间
+const updateReadTime = (message: LocalMessage) => {
+  // 客户端记录的最后阅读消息id立即更新
+  props.chat.lastSeenMessageId = message._id;
+  // 如果新阅读的消息比记录的最后阅读时间新，更新已读时间
+  if (message.createdAt > lastTime.value) {
+    lastTime.value = message.createdAt;
+    // 如果新阅读的消息比服务器记录的已读时间新，向服务器发送已读时间
+    if (
+      !props.chat.lastSeenReadTime ||
+      lastTime.value > props.chat.lastSeenReadTime
+    ) {
+      props.chat.unreadCount = Math.max(props.chat.unreadCount - 1, 0);
+      throttleToServer(message);
+    }
+  }
+};
 
 /**
  * @desc 更新展示消息列表。建议更新列表为有序状态
@@ -49,8 +88,9 @@ const updateMessages = async (
   }
   let unOrder = false;
   if (fullUpdate) {
-    // 强制全量更新，不排序
-    messages.value = newMessages;
+    // 强制全量更新，清空原数组且不排序。
+    messages.value.slice(0);
+    messages.value.push(...newMessages);
     messageLoading.value = false;
     return;
   } else if (reverse) {
@@ -85,32 +125,46 @@ defineExpose({ messages, updateMessages });
 
 watch(
   () => props.chat,
-  async (chat) => {
-    if (chat.lastSeenMessageId) {
-      // 有上次阅读记录，则从阅读记录处读取上下的消息记录
+  async (chat, oldChat) => {
+    messageLoading.value = true;
+    // 切换聊天对象时，清空消息列表和已读时间
+    if (chat.roomId !== oldChat?.roomId || chat.type !== oldChat?.type) {
+      messages.value.splice(0);
+      lastTime.value = new Date(0);
+    }
+    if (chat.lastSeenMessageId || chat.lastSeenReadTime) {
+      // 从阅读记录处读取上下的消息记录
       const beforeMessages = await getMessages(
         chat.roomId,
         chat.type,
         -1,
         10,
-        chat.lastSeenMessageId
+        chat.lastSeenMessageId,
+        chat.lastSeenReadTime
       );
-      updateMessages(beforeMessages, true, true);
-      // updateMessages(beforeMessages, true, false);
       const afterMessages = await getMessages(
         chat.roomId,
         chat.type,
         1,
         20,
-        chat.lastSeenMessageId
+        chat.lastSeenMessageId,
+        chat.lastSeenReadTime
       );
-      updateMessages(afterMessages, false, false);
+      // 如果服务器返回的下一条消息id和上一条消息相同，需要合并
+      if (
+        beforeMessages.length &&
+        afterMessages.length &&
+        beforeMessages[beforeMessages.length - 1]._id === afterMessages[0]._id
+      ) {
+        afterMessages.shift();
+      }
+      await updateMessages([...beforeMessages, ...afterMessages], false, true);
     } else {
-      // 没有上次阅读记录，说明从未阅读过，直接获取全部消息
-      const message = await getMessages(chat.roomId, chat.type, 1, 20);
-      updateMessages(message, false, true);
-      // updateMessages(message, false, false);
+      // 没有上次阅读记录，说明从未阅读过，直接从服务器从头开始获取消息
+      const messages = await getMessages(chat.roomId, chat.type, 1, 20);
+      await updateMessages(messages, false, true);
     }
+    messageLoading.value = false;
   },
   { immediate: true }
 );
@@ -156,11 +210,27 @@ watch(
   justify-content: end;
   position: relative;
   .content {
+    height: 100%;
     padding: 1em;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     row-gap: 1em;
+    overflow-y: hidden;
+  }
+
+  .scroll-bar {
+    position: absolute;
+    right: 0;
+    width: 10px;
+    height: 100%;
+    border-radius: 2px;
+    background-color: white;
+
+    .scroll-thumb {
+      width: 10px;
+
+      background-color: aqua;
+    }
   }
 }
 </style>

@@ -40,6 +40,7 @@ const curRoom: Ref<Chat> = ref({
   avatar: "",
   name: "",
   lastMessage: undefined,
+  unreadCount: 0,
 });
 
 const select = (room: Chat) => {
@@ -95,6 +96,7 @@ listenNewMessage(async (message, type) => {
           avatar: group.data.groupAvatar,
           name: group.data.groupName,
           lastMessage: message,
+          unreadCount: 1,
         });
       }
     }

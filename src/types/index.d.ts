@@ -32,7 +32,13 @@ declare type Chat = {
   roomId: string;
   avatar: string;
   name: string;
+  /** @desc 未读消息数 */
+  unreadCount: number;
+  /** @desc 由服务器提供的最后阅读时间 */
+  lastSeenReadTime?: Date;
+  /** @desc 由客户端维护的最后阅读消息id，若此id存在，则说明本地已经存在了未读消息附近的消息记录 */
   lastSeenMessageId?: string;
+  /** @desc 最新的一条消息，用于预览 */
   lastMessage?: LocalMessage;
   userId?: string;
 };
@@ -64,6 +70,11 @@ declare type LocalMessage = Message & {
   status?: number;
 };
 
+declare type CallConfig = {
+  method: string | "qiniu";
+  roomToken: string;
+};
+
 // 响应体 T
 declare type Response<T> = {
   code: number;
@@ -93,5 +104,23 @@ declare type GroupRequest =  {
   createdAt: Date;
 }
 
+declare type WsException = {
+  code: number;
+  error: { message: string };
+  event: string;
+  timestamp: string;
+};
 
-export { UserInfo, Contact, Group, Chat, Message, LocalMessage, Response, FriendRequest, GroupRequest };
+export {
+  UserInfo,
+  Contact,
+  Group,
+  Chat,
+  Message,
+  LocalMessage,
+  CallConfig,
+  Response,
+  FriendRequest,
+  GroupRequest,
+  WsException,
+};
