@@ -40,6 +40,7 @@ const callbackInfo: CallbackInfo[] = [
   height: 100vh;
   min-width: 200px;
   width: 250px;
+  z-index: 1;
   
   .bar {
     display: flex;

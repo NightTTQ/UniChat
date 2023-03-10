@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme="useDarkTheme === true ? darkTheme : null">
+  <n-config-provider :theme="useDarkTheme === false ? darkTheme : null">
     <n-el tag="div">
       <n-notification-provider>
         <!-- <n-button @click="useDarkTheme = !useDarkTheme"> 切换主题 </n-button> -->

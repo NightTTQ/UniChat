@@ -1,5 +1,5 @@
 import request from "@/services/axios/request";
-import { Response, Group } from "@/types";
+import { Response, Group, GroupRequest } from "@/types";
 
 const api = {
   list: "/group/list",
@@ -47,7 +47,7 @@ async function getRequest(
   skip?: number,
   limit?: number
 ) {
-  const { data } = await request.get<Response<Group[]>>(api.request, {
+  const { data } = await request.get<Response<GroupRequest[]>>(api.request, {
     params: { sessionID: sessionID, status: status, skip: skip, limit: limit },
   });
   return data;

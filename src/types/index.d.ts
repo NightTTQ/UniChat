@@ -82,6 +82,28 @@ declare type Response<T> = {
   message: string;
 };
 
+// 好友请求
+declare type FriendRequest =  {
+  // 这里的 _id 为好友请求的 id
+  _id: string;
+    // 请求用户的 userId
+  fromUser: string;
+  status: number;
+  createdAt: Date;
+}
+
+// 群聊请求
+declare type GroupRequest =  {
+  // 这里的 _id 为群聊请求的 id
+    _id: string;
+  // 请求用户的 userId
+  fromUser: string;
+  // 群聊 id
+  toGroup: string;
+  status: number;
+  createdAt: Date;
+}
+
 declare type WsException = {
   code: number;
   error: { message: string };
@@ -98,5 +120,7 @@ export {
   LocalMessage,
   CallConfig,
   Response,
+  FriendRequest,
+  GroupRequest,
   WsException,
 };
