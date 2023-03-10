@@ -1,5 +1,13 @@
 <template>
   <div class="wrapper">
+    <!-- 通话窗口模态框 -->
+    <Teleport to="body">
+      <CallPanel
+        v-if="globalVars.callModal.value.show"
+        @close="globalStore.toggleCallModal"
+        ref="callPanelRef"
+      />
+    </Teleport>
     <n-layout position="absolute" has-sider>
       <n-layout-sider
         content-style="padding:32px 0px"
@@ -57,7 +65,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, nextTick } from "vue";
+import { storeToRefs } from "pinia";
 import { useNotification } from "naive-ui";
 import { ChatbubbleOutline, Person, Settings } from "@vicons/ionicons5";
 import {
@@ -65,18 +74,24 @@ import {
   useContactsStore,
   useGroupsStore,
   useUsersStore,
+  useGlobalStore,
 } from "@/stores";
 import router from "@/router";
 import { info } from "@/services/userService";
 import { getList as getContacts } from "@/services/contactService";
 import { getList as getGroups } from "@/services/groupService";
+import { listenCallIncome, listenHangupCall } from "@/services/chatService";
+import CallPanel from "@/components/main/call/callPanel.vue";
 
 const notification = useNotification();
 const userStore = useUserStore();
 const usersStore = useUsersStore();
 const contactStore = useContactsStore();
 const groupStore = useGroupsStore();
+const globalStore = useGlobalStore();
+const globalVars = storeToRefs(useGlobalStore());
 const userInfo = userStore.userInfo;
+const callPanelRef = ref<InstanceType<typeof CallPanel> | null>(null);
 const active = ref(router.currentRoute.value.name);
 
 const handleClick = (icon: string) => {
@@ -91,6 +106,37 @@ const handleClick = (icon: string) => {
   if (icon === "settings") {
   }
 };
+// 监听来电事件
+const callIncome = (
+  data: { roomId: string; caller: string; method: string; roomToken: string },
+  cb: (res: { accept: boolean }) => void
+) => {
+  globalVars.callModal.value.roomId = data.roomId;
+  globalVars.callModal.value.userId = data.caller;
+  globalVars.callModal.value.callConfig.method = data.method;
+  globalVars.callModal.value.callConfig.roomToken = data.roomToken;
+  globalVars.callModal.value.incomeCallBack = cb;
+  globalVars.callModal.value.status = -1;
+  globalStore.toggleCallModal();
+};
+listenCallIncome(callIncome);
+// 监听他人挂断事件
+const hangupCall = (res: {
+  roomId: string;
+  userId: string;
+  hangup: boolean;
+}) => {
+  if (res.hangup) {
+    if (
+      res.roomId === globalVars.callModal.value.roomId &&
+      res.userId === globalVars.callModal.value.userId &&
+      callPanelRef.value
+    ) {
+      callPanelRef.value.decline();
+    }
+  }
+};
+listenHangupCall(hangupCall);
 
 onBeforeMount(async () => {
   // 数据初始化

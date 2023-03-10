@@ -1,7 +1,7 @@
 <template>
   <div class="chat-wrapper">
     <!-- 顶部常驻栏 -->
-    <PanelBar :name="name" />
+    <PanelBar :name="name" :chat="props.chat" @call="call" />
     <!-- 消息内容显示区 -->
     <ChatContent :chat="props.chat" ref="contentRef" />
     <!-- 消息输入发送区 -->
@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 
 import {
@@ -18,6 +18,7 @@ import {
   useContactsStore,
   useGroupsStore,
   useChatsStore,
+  useGlobalStore,
 } from "@/stores";
 import { Chat, LocalMessage } from "@/types";
 import { sendMessage } from "@/services/chatService";
@@ -32,7 +33,21 @@ const userStore = useUserStore();
 const chatsStore = useChatsStore();
 const contacts = storeToRefs(useContactsStore()).contacts;
 const groups = storeToRefs(useGroupsStore()).groups;
+const globalStore = useGlobalStore();
+const callModalVars = storeToRefs(useGlobalStore()).callModal;
 const contentRef = ref<InstanceType<typeof ChatContent>>();
+
+/**
+ * @desc 主动发起通话，打开通话面板
+ */
+const call = () => {
+  if (props.chat.roomId && props.chat.userId) {
+    callModalVars.value.roomId = props.chat.roomId;
+    callModalVars.value.userId = props.chat.userId;
+    callModalVars.value.status = 0;
+    globalStore.toggleCallModal();
+  }
+};
 
 const name = computed(() => {
   if (props.chat.type === 1) {
@@ -98,12 +113,12 @@ const sendNewMessage = async (message: string) => {
 
 defineExpose({
   /**
- * @desc 更新展示消息列表。建议更新列表为有序状态。
- * 只有面板展示的房间与新消息所属房间一致时才会更新。
- * @param newMessages 需要加入展示列表的消息
- * @param reverse 是否将新列表加在原列表前面
- * @param fullUpdate 是否为全量更新
- */
+   * @desc 更新展示消息列表。建议更新列表为有序状态。
+   * 只有面板展示的房间与新消息所属房间一致时才会更新。
+   * @param newMessages 需要加入展示列表的消息
+   * @param reverse 是否将新列表加在原列表前面
+   * @param fullUpdate 是否为全量更新
+   */
   updateMessages: (
     newMessages: LocalMessage[],
     reverse: boolean = false,

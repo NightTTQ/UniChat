@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 import router from "@/router";
 import { useUserStore } from "@/stores";
-import { Chat, Message, Response, LocalMessage } from "@/types";
+import { Chat, Message, Response, LocalMessage, CallConfig } from "@/types";
 import { messagePersistence } from "@/services/messageService";
 
 const events = {
@@ -12,6 +12,10 @@ const events = {
   sendMessage: "sendMessage",
   unreadMessage: "unreadMessage",
   readMessage: "readMessage",
+  callIncome: "callIncome",
+  requestCall: "requestCall",
+  cancelCall: "cancelCall",
+  hangupCall: "hangupCall",
 };
 const hooks: Record<string, (...args: any) => void> = {
   receiveMessage: () => {},
@@ -161,17 +165,80 @@ function readMessage(
 }
 
 /**
+ * @desc 向服务器请求通话
+ * @param roomId 请求通话所在的房间id
+ * @param toId 请求通话的对象id
+ * @param cb 接收服务器确认通话请求的回调函数，进入等待状态
+ */
+function requestCall(
+  roomId: string,
+  toId: string,
+  cb?: (res: { roomId: string; status: number }) => void
+): Promise<CallConfig> {
+  return new Promise((resolve, reject) => {
+    if (cb) socket.once(events.requestCall, cb);
+    socket.emit(
+      events.requestCall,
+      {
+        roomId: roomId,
+        toId: toId,
+      },
+      (res: Response<CallConfig>) => {
+        if (res.code === 200) {
+          resolve(res.data);
+        } else {
+          reject(res);
+        }
+      }
+    );
+  });
+}
+
+/**
+ * @desc 取消通话请求
+ */
+function cancelCall() {
+  socket.emit(events.cancelCall, { cancel: true });
+}
+
+/**
+ * @desc 结束通话
+ */
+function hangupCall(roomId: string) {
+  socket.emit(events.hangupCall, { roomId: roomId, hangup: true });
+}
+
+/**
+ * @desc 接收服务器推送的通话请求，全局只允许绑定一个回调函数
+ * @param cb 接收服务器推送的通话请求的回调函数
+ */
+function listenCallIncome(
+  cb: (
+    data: { roomId: string; caller: string; method: string; roomToken: string },
+    cb: (res: { accept: boolean }) => void
+  ) => void
+) {
+  socket.removeAllListeners(events.callIncome);
+  socket.on(events.callIncome, cb);
+}
+
+/**
+ * @desc 监听服务器推送的他人结束通话的消息，全局只允许绑定一个回调函数
+ */
+function listenHangupCall(
+  cb: (res: { roomId: string; userId: string; hangup: boolean }) => void
+) {
+  socket.removeAllListeners(events.hangupCall);
+  socket.on(events.hangupCall, cb);
+}
+
+/**
  * @desc 获取未读消息（全局只允许绑定一个回调函数）
  * @param cb 监听回调函数
  */
 function getUnreadMessage(cb: (chat: Chat) => void) {
   return new Promise(async (resolve) => {
-    const listeners = socket.listeners(events.unreadMessage);
-    if (listeners.length > 0) {
-      for (const listener of listeners) {
-        socket.off(events.unreadMessage, listener);
-      }
-    }
+    socket.removeAllListeners(events.unreadMessage);
     socket.on(events.unreadMessage, cb);
     await verified;
     socket.emit(events.unreadMessage, (data: any) => {
@@ -194,6 +261,11 @@ export {
   getUnreadMessage,
   listenNewMessage,
   readMessage,
+  requestCall,
+  cancelCall,
+  hangupCall,
+  listenCallIncome,
+  listenHangupCall,
 };
 export default {
   getMessage,
@@ -201,4 +273,9 @@ export default {
   getUnreadMessage,
   listenNewMessage,
   readMessage,
+  requestCall,
+  cancelCall,
+  hangupCall,
+  listenCallIncome,
+  listenHangupCall,
 };

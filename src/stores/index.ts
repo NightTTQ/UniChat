@@ -189,6 +189,29 @@ const useUsersStore = defineStore({
   },
 });
 
+/**
+ * @desc 全局状态
+ */
+const useGlobalStore = defineStore({
+  id: "global",
+  state: () => ({
+    callModal: {
+      show: false,
+      roomId: "",
+      userId: "",
+      /** @desc -1呼入等待0正在呼叫1正在振铃2正在连接3通话中4通话结束5无人接听6拒绝通话 */
+      status: 0,
+      callConfig: { method: "", roomToken: "" },
+      incomeCallBack: (res: { accept: boolean }): void => {},
+    },
+  }),
+  actions: {
+    toggleCallModal() {
+      this.callModal.show = !this.callModal.show;
+    },
+  },
+});
+
 // 当前联系人面板信息
 const useCurrentContactStore = defineStore({
   id: "currentContact",
@@ -208,5 +231,6 @@ export {
   useGroupsStore,
   useChatsStore,
   useUsersStore,
+  useGlobalStore,
   useCurrentContactStore,
 };

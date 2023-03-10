@@ -70,6 +70,11 @@ declare type LocalMessage = Message & {
   status?: number;
 };
 
+declare type CallConfig = {
+  method: string | "qiniu";
+  roomToken: string;
+};
+
 // 响应体 T
 declare type Response<T> = {
   code: number;
@@ -77,4 +82,21 @@ declare type Response<T> = {
   message: string;
 };
 
-export { UserInfo, Contact, Group, Chat, Message, LocalMessage, Response };
+declare type WsException = {
+  code: number;
+  error: { message: string };
+  event: string;
+  timestamp: string;
+};
+
+export {
+  UserInfo,
+  Contact,
+  Group,
+  Chat,
+  Message,
+  LocalMessage,
+  CallConfig,
+  Response,
+  WsException,
+};

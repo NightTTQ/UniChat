@@ -45,10 +45,10 @@ const props = defineProps<{
 
 nextTick(() => {
   if (props.isUserSend) {
-    console.log("自己的消息滑动")
+    // console.log("自己的消息滑动")
     document.querySelector(".content")?.scrollIntoView(false);
   } else {
-    console.log("别人新消息不滑")
+    // console.log("别人新消息不滑")
   }
 });
 
