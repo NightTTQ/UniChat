@@ -2,14 +2,15 @@
   <div class="content-wrapper">
     <n-scrollbar>
       <div class="content" ref="contentRef">
-        <div v-for="message of messages" ref="bubblesRef">
+        <div v-for="(message, index) of messages" ref="bubblesRef">
           <Bubble
+            v-intersect="observer"
+            :key="message._id"
+            :data-index="index"
             :message="message"
             :is-user-send="userInfo._id === message.fromId"
             :sender-avatar="users[message.fromId]?.avatar || ''"
             :sender-name="users[message.fromId]?.username || message.fromId"
-            :container="contentRef"
-            @visible="updateReadTime"
           />
         </div>
       </div>
@@ -70,6 +71,20 @@ const updateReadTime = (message: LocalMessage) => {
   }
 };
 
+const observer = new IntersectionObserver(
+  (entries) => {
+    // 遍历所有被观察的元素，对于在视口内的元素，更新已读时间
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        const messageEl = entry.target;
+        updateReadTime(
+          messages.value[Number(messageEl.getAttribute("data-index"))]
+        );
+      }
+    }
+  },
+  { threshold: 0.5, root: contentRef.value }
+);
 /**
  * @desc 更新展示消息列表。建议更新列表为有序状态
  * @param newMessages 需要加入展示列表的消息

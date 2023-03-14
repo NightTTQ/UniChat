@@ -20,7 +20,7 @@
             <img
               class="avatar"
               draggable="false"
-              :src="userInfo?.avatar"
+              :src="userInfo.avatar"
               alt="Avatar"
             />
             <div class="icon" @click="handleClick('chat')">
@@ -90,7 +90,7 @@ const contactStore = useContactsStore();
 const groupStore = useGroupsStore();
 const globalStore = useGlobalStore();
 const globalVars = storeToRefs(useGlobalStore());
-const userInfo = userStore.userInfo;
+const userInfo = storeToRefs(useUserStore()).userInfo;
 const callPanelRef = ref<InstanceType<typeof CallPanel> | null>(null);
 const active = ref(router.currentRoute.value.name);
 

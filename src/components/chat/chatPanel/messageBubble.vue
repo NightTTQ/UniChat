@@ -39,8 +39,6 @@ const props = defineProps<{
   senderName: string;
   /** @desc 此消息是否是用户自己发送的 */
   isUserSend: boolean;
-  /** @desc 父级框 */
-  container?: Element;
 }>();
 
 nextTick(() => {
@@ -49,29 +47,6 @@ nextTick(() => {
     document.querySelector(".content")?.scrollIntoView(false);
   } else {
     // console.log("别人新消息不滑")
-  }
-});
-
-const emit = defineEmits<{
-  (event: "visible", message: LocalMessage): void;
-  (event: "invisible", message: LocalMessage): void;
-}>();
-
-// 监听消息是否进入可视区域
-const observer = new IntersectionObserver(
-  (entries) => {
-    if (entries[0].isIntersecting) {
-      emit("visible", props.message);
-    } else {
-      emit("invisible", props.message);
-    }
-  },
-  { threshold: 0.5, root: props.container }
-);
-// Dom渲染完成后，开始监听
-nextTick(() => {
-  if (bubble.value) {
-    observer.observe(bubble.value);
   }
 });
 </script>

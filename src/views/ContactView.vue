@@ -8,8 +8,11 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
+import { ContactList } from "@/components/contact/contactList";
+import { ContactPanel } from "@/components/contact/contactPanel";
 import ContactRequest from "@/components/contact/contactRequest/contactRequest.vue";
 import RequestList from "@/components/contact/contactRequest/requestList.vue";
+
 const isShow = ref(true);
 
 // 点击控制信息面板和请求面板的显示

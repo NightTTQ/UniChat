@@ -47,7 +47,7 @@ const callbackInfo: CallbackInfo[] = [
     align-items: center;
     justify-content: center;
     padding: 12px;
-    background-color: rgb(24, 24, 28);
+    //background-color: rgb(24, 24, 28);
   }
   .list {
     flex: 1;

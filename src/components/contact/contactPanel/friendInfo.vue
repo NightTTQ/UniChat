@@ -12,9 +12,7 @@
           </div>
         </div>
       </n-layout-header>
-      <n-layout-content
-        content-style="backgroundColor: rgb(24,24,28); padding: 20px"
-      >
+      <n-layout-content content-style="padding: 20px">
         <div class="info-item" v-for="label in labels" :key="label.key">
           <div class="label-name">{{ label.labelname }}</div>
           <div class="label-content">

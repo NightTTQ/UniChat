@@ -1,8 +1,15 @@
 <template>
   <div class="call-wrapper">
     <div class="call-content">
+      <div class="call-header">
+        <div class="call-setting"></div>
+      </div>
       <div class="call-info">
-        <img :src="user?.avatar" class="avatar" />
+        <img
+          v-show="callModalVars.status !== 3"
+          :src="user?.avatar"
+          class="avatar"
+        />
         <h1 class="name">{{ user?.username }}</h1>
         <p class="status">{{ statusText[callModalVars.status] }}</p>
       </div>
@@ -11,20 +18,22 @@
         <div class="action-item">
           <VideocamOff
             v-if="settings.camera"
-            class="icon"
+            class="icon active"
             @click="enableCamera(false)"
           />
           <Videocam v-else class="icon" @click="enableCamera(true)" />
-          <div class="text">摄像头</div>
+          <div class="text">
+            {{ settings.camera ? "视频已开" : "视频" }}
+          </div>
         </div>
         <div class="action-item">
           <VolumeHigh
             v-if="settings.silence"
-            class="icon"
+            class="icon active"
             @click="disableVolume(false)"
           />
           <VolumeMute v-else class="icon" @click="disableVolume(true)" />
-          <div class="text">静音</div>
+          <div class="text">{{ settings.silence ? "已静音" : "静音" }}</div>
         </div>
         <div
           v-if="callModalVars.status === -1"
@@ -180,7 +189,7 @@ const init = async () => {
         callModalVars.value.roomId,
         callModalVars.value.userId,
         (res: { roomId: string; status: number }) => {
-          if (res.roomId === callModalVars.value.roomId) {
+          if (res.roomId === callModalVars.value.roomId && res.status === 1) {
             // 收到服务器发起通话的回应，说明通话请求已发起，对方振铃
             callModalVars.value.status = res.status;
           }
@@ -231,11 +240,17 @@ defineExpose({ decline });
   justify-content: center;
   align-items: center;
   user-select: none;
+  &::before {
+    content: "";
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: inherit;
+    backdrop-filter: blur(5px);
+  }
   .call-content {
     display: grid;
     align-items: center;
-    background-color: gray;
-    border-radius: 1em;
     height: 100%;
     width: 100%;
     .call-info {
@@ -260,7 +275,7 @@ defineExpose({ decline });
     }
   }
   .action {
-    z-index: 1000;
+    z-index: 1;
     align-self: flex-end;
     justify-self: center;
     display: flex;
@@ -274,11 +289,16 @@ defineExpose({ decline });
       margin-bottom: 1em;
       .icon {
         cursor: pointer;
-        background-color: black;
+        background-color: rgba($color: #000, $alpha: 0.5);
+        color: #fff;
         border-radius: 50%;
         padding: 1em;
         width: 4em;
         height: 4em;
+      }
+      .icon.active {
+        background-color: #fff;
+        color: #000;
       }
       .accept {
         background-color: green;
@@ -288,7 +308,6 @@ defineExpose({ decline });
         transform: rotate(135deg);
       }
       .text {
-        font-weight: bold;
         margin-top: 0.5em;
       }
     }

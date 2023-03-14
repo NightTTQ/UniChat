@@ -1,4 +1,4 @@
-import { createApp } from "vue";
+import { createApp, DirectiveBinding } from "vue";
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import "./style.css";
@@ -8,4 +8,12 @@ import router from "./router";
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
-createApp(App).use(router).use(pinia).mount("#app");
+createApp(App)
+  .directive("intersect", {
+    mounted(el, binding: DirectiveBinding<IntersectionObserver>) {
+      binding.value.observe(el);
+    },
+  })
+  .use(router)
+  .use(pinia)
+  .mount("#app");

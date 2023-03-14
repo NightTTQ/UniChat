@@ -19,7 +19,7 @@ const toRequest = () => {};
 
 <style lang="scss" scoped>
 .wrapper {
-  background-color: rgb(24,24,28);
+  //background-color: rgb(24,24,28);
   padding: 0 1em;
   height: 7em;
   display: flex;

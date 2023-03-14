@@ -31,7 +31,7 @@ const emit = defineEmits<{
   padding: 1em;
   text-align: center;
   justify-content: space-between;
-  background-color: rgb(24, 24, 28);
+  //background-color: rgb(24, 24, 28);
   .chat-name {
     font-weight: bold;
   }
@@ -39,7 +39,6 @@ const emit = defineEmits<{
     display: flex;
     align-items: center;
     justify-content: center;
-
     .action-call {
       width: 3em;
       padding: 0.5em;

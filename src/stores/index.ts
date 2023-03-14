@@ -194,7 +194,18 @@ const useUsersStore = defineStore({
  */
 const useGlobalStore = defineStore({
   id: "global",
-  state: () => ({
+  state: (): {
+    theme: { useDarkTheme?: boolean };
+    callModal: {
+      show: boolean;
+      roomId: string;
+      userId: string;
+      status: -1 | 0 | 1 | 2 | 3 | 4 | 5 | 6;
+      callConfig: { method: string; roomToken: string };
+      incomeCallBack: (res: { accept: boolean }) => void;
+    };
+  } => ({
+    theme: { useDarkTheme: undefined },
     callModal: {
       show: false,
       roomId: "",

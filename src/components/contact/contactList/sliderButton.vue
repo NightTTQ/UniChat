@@ -7,7 +7,7 @@
       :id="item.name"
       @click="item.callback"
     >
-      <button>{{ item.labelname }}</button>
+      <div class="slider-text">{{ item.labelname }}</div>
     </div>
   </div>
 </template>
@@ -52,7 +52,6 @@ onMounted(init);
   align-items: center;
   background-color: inherit;
 }
-
 .slider-item {
   flex: 1;
   height: 100%;
@@ -60,18 +59,16 @@ onMounted(init);
   justify-content: center;
   display: flex;
 }
-
-.slider-item button {
+.slider-item .slider-text {
   border: 0;
   height: 50px;
-  color: white;
   background-color: inherit;
   font-size: 15px;
   cursor: pointer;
-  box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
-
-.active button {
+.active .slider-text {
   border-bottom: 2px solid var(--primary-color);
 }
 </style>
