@@ -1,7 +1,21 @@
 <template>
   <n-layout style="height: 100vh" has-sider ref="containerRef">
     <ChatList :chats="chats" @select="select" />
-    <ChatPanel v-if="curRoom.roomId" :chat="curRoom" ref="panelRef" />
+    <router-view v-slot="{ Component }">
+      <transition mode="out-in">
+        <keep-alive>
+          <component
+            :key="`${curRoom.type}${curRoom.roomId}`"
+            :is="
+              curRoom.type === 1
+                ? panels.single[curRoom.roomId]
+                : panels.group[curRoom.roomId]
+            "
+            ref="panelRef"
+          ></component>
+        </keep-alive>
+      </transition>
+    </router-view>
   </n-layout>
 </template>
 <script setup lang="ts">
@@ -26,9 +40,13 @@ import { getUnreadMessage, listenNewMessage } from "@/services/chatService";
 import { getContactInfo } from "@/services/contactService";
 import { getGroupInfo } from "@/services/groupService";
 
-// const instance = getCurrentInstance();
-// const containerRef: VNodeRef = ref();
-// const panels: Ref<VNode[]> = ref([]);
+const panels: Ref<{
+  single: Record<string, VNode>;
+  group: Record<string, VNode>;
+}> = ref({
+  single: {},
+  group: {},
+});
 const notification = useNotification();
 const userStore = useUserStore();
 const chatsStore = useChatsStore();
@@ -44,14 +62,14 @@ const curRoom: Ref<Chat> = ref({
 });
 
 const select = (room: Chat) => {
-  // TODO:对于每个聊天面板分别进行缓存，动态渲染
-  // console.log(instance);
-
-  // const node = h(ChatPanel, { chat: room });
-  // render(node, containerRef.value.$el.lastElementChild);
-  // panels.value.push(node);
-  // console.log(instance?.vnode);
-
+  // 对于每个聊天面板分别进行缓存，动态渲染
+  if (room.type === 1) {
+    if (!panels.value.single[room.roomId])
+      panels.value.single[room.roomId] = h(ChatPanel, { chat: room });
+  } else if (room.type === 2) {
+    if (!panels.value.group[room.roomId])
+      panels.value.group[room.roomId] = h(ChatPanel, { chat: room });
+  }
   curRoom.value = room;
 };
 
@@ -64,18 +82,14 @@ onBeforeMount(() => {
 
 // 监听服务器推送新消息，将新消息同步至消息面板及消息列表
 listenNewMessage(async (message, type) => {
-  if (message.roomId === curRoom.value.roomId && type === curRoom.value.type) {
-    // 同步至消息面板。若没打开任何面板则无需更新。
-    panelRef.value?.updateMessages([message], false, false);
-  }
-  // 同步至消息列表。一定需要更新。
-  // 先查找消息列表中是否有该消息所属的房间
+  // 同步至消息列表。先查找消息列表中是否有该消息所属的房间
   const chat = chatsStore.chats.find(
     (chat) => chat.roomId === message.roomId && chat.type === type
   );
   if (chat) {
     // 已有此房间，直接更新即可
     chatsStore.updateLastMessage(chat, message);
+    chat.unreadCount++;
   } else {
     // 没有此房间，先从服务器获取房间信息
     if (type === 1) {
@@ -83,6 +97,7 @@ listenNewMessage(async (message, type) => {
       const chat = await getContactInfo(userStore.sessionID!, message.roomId);
       if (chat.code === 200) {
         chat.data.lastMessage = message;
+        chat.data.unreadCount = 1;
         chatsStore.addChat(chat.data);
       }
     }
@@ -100,6 +115,10 @@ listenNewMessage(async (message, type) => {
         });
       }
     }
+  }
+  if (message.roomId === curRoom.value.roomId && type === curRoom.value.type) {
+    // 同步至消息面板。若新消息不属于当前打开的面板则无需更新。
+    panelRef.value?.updateMessages([message], false, false);
   }
 });
 </script>
