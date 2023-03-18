@@ -3,11 +3,23 @@
 import { onMounted } from "vue";
 import { useNotification } from "naive-ui";
 import router from "@/router";
-import { useUserStore } from "@/stores";
+import {
+  useUserStore,
+  useChatsStore,
+  useUsersStore,
+  useGlobalStore,
+  useContactsStore,
+  useGroupsStore,
+} from "@/stores";
 import userService from "@/services/userService";
 
 const notification = useNotification();
 const userStore = useUserStore();
+const chatsStore = useChatsStore();
+const usersStore = useUsersStore();
+const globalStore = useGlobalStore();
+const contactsStore = useContactsStore();
+const groupsStore = useGroupsStore();
 
 onMounted(() => {
   doLogout();
@@ -41,6 +53,12 @@ const doLogout = async () => {
       });
     }
   }
+  userStore.$reset();
+  chatsStore.$reset();
+  usersStore.$reset();
+  globalStore.$reset();
+  contactsStore.$reset();
+  groupsStore.$reset();
   router.push({ name: "login" });
 };
 </script>

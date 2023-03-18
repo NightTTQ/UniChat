@@ -43,9 +43,9 @@
             </div>
           </div>
           <div class="sider-item">
-            <div class="icon" @click="handleClick('settings')">
+            <div class="icon" @click="handleClick('menu')">
               <n-icon size="24" class="icon">
-                <Settings />
+                <Menu />
               </n-icon>
             </div>
           </div>
@@ -68,7 +68,7 @@
 import { ref, onBeforeMount, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import { useNotification } from "naive-ui";
-import { ChatbubbleOutline, Person, Settings } from "@vicons/ionicons5";
+import { ChatbubbleOutline, Person, Menu } from "@vicons/ionicons5";
 import {
   useUserStore,
   useContactsStore,
@@ -103,7 +103,7 @@ const handleClick = (icon: string) => {
     active.value = "contact";
     router.push({ name: "friend" });
   }
-  if (icon === "settings") {
+  if (icon === "menu") {
   }
 };
 // 监听来电事件
