@@ -41,13 +41,9 @@ const props = defineProps<{
   isUserSend: boolean;
 }>();
 
-nextTick(() => {
-  if (props.isUserSend) {
-    // console.log("自己的消息滑动")
-    document.querySelector(".content")?.scrollIntoView(false);
-  } else {
-    // console.log("别人新消息不滑")
-  }
+defineExpose({
+  message: props.message,
+  bubble,
 });
 </script>
 <style lang="scss" scoped>
