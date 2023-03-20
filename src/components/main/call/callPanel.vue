@@ -90,14 +90,26 @@ const user = ref<UserInfo | null>(null);
 const callRef = ref<InstanceType<typeof CallContent>>();
 
 // 摄像头
-const enableCamera = (value: boolean) => {
-  settings.value.camera = value;
-  callRef.value?.toggleCamera(value);
+const enableCamera = async (value: boolean) => {
+  if (
+    callModalVars.value.status !== 4 &&
+    callModalVars.value.status !== 5 &&
+    callModalVars.value.status !== 6
+  ) {
+    await callRef.value?.toggleCamera(value);
+    settings.value.camera = value;
+  }
 };
 // 静音
-const disableVolume = (value: boolean) => {
-  settings.value.silence = value;
-  callRef.value?.toggleMicrophone(!value);
+const disableVolume = async (value: boolean) => {
+  if (
+    callModalVars.value.status !== 4 &&
+    callModalVars.value.status !== 5 &&
+    callModalVars.value.status !== 6
+  ) {
+    callRef.value?.toggleMicrophone(!value);
+    settings.value.silence = value;
+  }
 };
 /**
  * @desc 停止通话中的本地预览

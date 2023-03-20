@@ -41,7 +41,7 @@ const contentRef = ref<InstanceType<typeof ChatContent>>();
  * @desc 主动发起通话，打开通话面板
  */
 const call = () => {
-  if (props.chat.roomId && props.chat.userId) {
+  if (props.chat.roomId && props.chat.userId && !callModalVars.value.show) {
     callModalVars.value.roomId = props.chat.roomId;
     callModalVars.value.userId = props.chat.userId;
     callModalVars.value.status = 0;

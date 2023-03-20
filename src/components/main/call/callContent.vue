@@ -1,22 +1,39 @@
 <template>
   <div class="content-wrapper">
-    <n-select
-      v-if="useCamera"
-      v-model:value="selectedCameraId"
-      value-field="deviceId"
-      label-field="label"
-      :options="cameras"
-      :on-update:value="switchCamera"
-    />
-
-    <n-select
-      v-if="useMicrophone"
-      v-model:value="selectedMicrophoneId"
-      value-field="deviceId"
-      label-field="label"
-      :options="microphones"
-      :on-update:value="switchMicrophone"
-    />
+    <div class="call-header">
+      <div></div>
+      <n-popover trigger="click" placement="left-start" :show-arrow="false">
+        <template #trigger>
+          <div class="setting-icon">
+            <Settings />
+          </div>
+        </template>
+        <div class="call-settings">
+          <div>
+            <h4>摄像头</h4>
+            <n-select
+              v-model:value="selectedCameraId"
+              value-field="deviceId"
+              label-field="label"
+              :options="cameras"
+              :on-update:value="switchCamera"
+              :disabled="switchingTracks.video"
+            />
+          </div>
+          <div>
+            <h4>麦克风</h4>
+            <n-select
+              v-model:value="selectedMicrophoneId"
+              value-field="deviceId"
+              label-field="label"
+              :options="microphones"
+              :on-update:value="switchMicrophone"
+              :disabled="switchingTracks.audio"
+            />
+          </div>
+        </div>
+      </n-popover>
+    </div>
 
     <div class="remote-track" ref="remoteRef"></div>
     <div class="local-track" ref="localRef"></div>
@@ -24,6 +41,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, nextTick } from "vue";
+import { Settings } from "@vicons/ionicons5";
 import QNRTC, {
   QNTransportPolicy,
   QNConnectionState,
@@ -50,9 +68,11 @@ const selectedMicrophoneId = ref();
 const useCamera = ref(false);
 const useMicrophone = ref(true);
 const localTracks = ref<{
-  videoTrack?: QNLocalVideoTrack;
-  audioTrack?: QNLocalAudioTrack;
+  videoTrack?: QNLocalVideoTrack | null;
+  audioTrack?: QNLocalAudioTrack | null;
 }>({ videoTrack: undefined, audioTrack: undefined });
+const switchingTracks = ref({ video: false, audio: false });
+let active = true;
 
 QNRTC.onCameraChanged = async () => {
   cameras.value = await QNRTC.getCameras();
@@ -85,6 +105,7 @@ const autoSubscribe = (client: QNRTCClient) => {
  * @desc 生成视频轨道
  */
 const genVideoTrack = async () => {
+  if (!active) return null;
   return await QNRTC.createCameraVideoTrack({
     cameraId: selectedCameraId.value,
   });
@@ -93,6 +114,7 @@ const genVideoTrack = async () => {
  * @desc 生成音频轨道
  */
 const genAudioTrack = async () => {
+  if (!active) return null;
   return await QNRTC.createMicrophoneAudioTrack({
     microphoneId: selectedMicrophoneId.value,
   });
@@ -118,8 +140,6 @@ const renderLocalTracks = () => {
   if (localRef.value) {
     if (localTracks.value?.videoTrack)
       localTracks.value.videoTrack.play(localRef.value);
-    // if (localTracks.value?.audioTrack)
-    //   localTracks.value.audioTrack.play(localRef.value);
   }
 };
 
@@ -140,6 +160,7 @@ const join = async (roomToken: string) => {
  * @desc 断开连接离开房间
  */
 const leave = async () => {
+  active = false;
   if (client.roomName) {
     if (localTracks.value?.videoTrack)
       client.unpublish(localTracks.value.videoTrack);
@@ -155,6 +176,7 @@ const leave = async () => {
  * @desc 开关摄像头
  */
 const toggleCamera = async (enable: boolean) => {
+  switchingTracks.value.video = true;
   // 启用摄像头
   if (enable) {
     if (selectedCameraId.value === undefined) {
@@ -162,7 +184,7 @@ const toggleCamera = async (enable: boolean) => {
     }
     useCamera.value = true;
     localTracks.value.videoTrack = await genVideoTrack();
-    if (client.roomName) {
+    if (client.roomName && localTracks.value.videoTrack) {
       await client.publish(localTracks.value.videoTrack);
     }
     renderLocalTracks();
@@ -177,29 +199,38 @@ const toggleCamera = async (enable: boolean) => {
       localTracks.value.videoTrack = undefined;
     }
   }
+  switchingTracks.value.video = false;
 };
 /**
  * @desc 切换摄像头
  */
 const switchCamera = async (value: string) => {
+  switchingTracks.value.video = true;
   selectedCameraId.value = value;
+  // 如果已经发布了视频轨道，先取消发布
   if (client.roomName && localTracks.value?.videoTrack) {
     client.unpublish(localTracks.value.videoTrack);
   }
+  // 销毁本地视频轨道
   if (localTracks.value?.videoTrack) {
     localTracks.value.videoTrack.destroy();
     localTracks.value.videoTrack = undefined;
   }
-  localTracks.value.videoTrack = await genVideoTrack();
-  renderLocalTracks();
-  if (client.roomName) {
+  // 只有开启了摄像头才生成本地轨道并渲染
+  if (useCamera.value) {
+    localTracks.value.videoTrack = await genVideoTrack();
+    renderLocalTracks();
+  }
+  if (client.roomName && localTracks.value.videoTrack) {
     await client.publish(localTracks.value.videoTrack);
   }
+  switchingTracks.value.video = false;
 };
 /**
  * @desc 开关麦克风
  */
 const toggleMicrophone = async (enable: boolean) => {
+  switchingTracks.value.audio = true;
   // 启用麦克风
   if (enable) {
     if (selectedMicrophoneId.value === undefined) {
@@ -207,7 +238,7 @@ const toggleMicrophone = async (enable: boolean) => {
     }
     useMicrophone.value = true;
     localTracks.value.audioTrack = await genAudioTrack();
-    if (client.roomName) {
+    if (client.roomName && localTracks.value.audioTrack) {
       await client.publish(localTracks.value.audioTrack);
     }
   } else {
@@ -221,12 +252,15 @@ const toggleMicrophone = async (enable: boolean) => {
       localTracks.value.audioTrack = undefined;
     }
   }
+  switchingTracks.value.audio = false;
 };
 /**
  * @desc 切换麦克风
  */
 const switchMicrophone = async (value: string) => {
+  switchingTracks.value.audio = true;
   selectedMicrophoneId.value = value;
+  // 如果已经发布了音频轨道，先取消发布
   if (client.roomName && localTracks.value?.audioTrack) {
     client.unpublish(localTracks.value.audioTrack);
   }
@@ -234,13 +268,16 @@ const switchMicrophone = async (value: string) => {
     localTracks.value.audioTrack.destroy();
     localTracks.value.audioTrack = undefined;
   }
-  localTracks.value.audioTrack = await genAudioTrack();
-  if (client.roomName) {
+  // 只有开启了麦克风才生成本地轨道
+  if (useMicrophone.value) localTracks.value.audioTrack = await genAudioTrack();
+  if (client.roomName && localTracks.value.audioTrack) {
     await client.publish(localTracks.value.audioTrack);
   }
+  switchingTracks.value.audio = false;
 };
 
 const init = async (camera = false, silence = false) => {
+  active = true;
   autoSubscribe(client);
   // 监听连接状态变化
   client.on("connection-state-changed", (state: string, info: any) => {
@@ -261,12 +298,8 @@ const init = async (camera = false, silence = false) => {
   );
   cameras.value = await QNRTC.getCameras();
   microphones.value = await QNRTC.getMicrophones();
-  // selectedCameraId.value = cameras.value[0].deviceId;
-  // selectedMicrophoneId.value = microphones.value[0].deviceId;
   if (camera === true) toggleCamera(true);
   if (silence === false) toggleMicrophone(true);
-  // 本地用户预览
-  // renderLocalTracks();
 };
 defineExpose({ join, leave, toggleCamera, toggleMicrophone });
 init();
@@ -278,6 +311,31 @@ init();
   display: flex;
   height: 100%;
   width: 100%;
+  .call-header {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    width: 100%;
+    height: 3em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .setting-icon {
+      height: 3em;
+      width: 3em;
+      padding: 0.5em;
+      cursor: pointer;
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+    .call-settings {
+      display: flex;
+      flex-direction: column;
+      row-gap: 1em;
+    }
+  }
+
   .remote-track {
     position: absolute;
     z-index: -1;
