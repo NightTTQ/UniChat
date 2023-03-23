@@ -29,6 +29,7 @@ declare module '@vue/runtime-core' {
     LoginCard: typeof import('./src/components/login/loginCard.vue')['default']
     Logout: typeof import('./src/components/Logout.vue')['default']
     MessageBubble: typeof import('./src/components/chat/chatPanel/messageBubble.vue')['default']
+    MoreAction: typeof import('./src/components/main/moreAction.vue')['default']
     NA: typeof import('naive-ui')['NA']
     NBackTop: typeof import('naive-ui')['NBackTop']
     NButton: typeof import('naive-ui')['NButton']

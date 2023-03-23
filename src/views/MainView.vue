@@ -43,11 +43,7 @@
             </div>
           </div>
           <div class="sider-item">
-            <div class="icon" @click="handleClick('menu')">
-              <n-icon size="24" class="icon">
-                <Menu />
-              </n-icon>
-            </div>
+            <MoreAction />
           </div>
         </div>
       </n-layout-sider>
@@ -68,7 +64,7 @@
 import { ref, onBeforeMount, nextTick } from "vue";
 import { storeToRefs } from "pinia";
 import { useNotification } from "naive-ui";
-import { ChatbubbleOutline, Person, Menu } from "@vicons/ionicons5";
+import { ChatbubbleOutline, Person } from "@vicons/ionicons5";
 import {
   useUserStore,
   useContactsStore,
@@ -82,6 +78,7 @@ import { getList as getContacts } from "@/services/contactService";
 import { getList as getGroups } from "@/services/groupService";
 import { listenCallIncome, listenHangupCall } from "@/services/chatService";
 import CallPanel from "@/components/main/call/callPanel.vue";
+import MoreAction from "@/components/main/moreAction.vue";
 
 const notification = useNotification();
 const userStore = useUserStore();
@@ -102,8 +99,6 @@ const handleClick = (icon: string) => {
   if (icon === "contact") {
     active.value = "contact";
     router.push({ name: "friend" });
-  }
-  if (icon === "menu") {
   }
 };
 // 监听来电事件
