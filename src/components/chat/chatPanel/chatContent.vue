@@ -164,6 +164,7 @@ const updateMessages = async (
     messages.value.unshift(...newMessages);
     // 合并处数据无序，需要整体排序
     if (
+      newMessages.length &&
       messages.value.length > newMessages.length &&
       newMessages[newMessages.length - 1].createdAt >
         messages.value[newMessages.length].createdAt
@@ -219,15 +220,17 @@ const init = async () => {
     }
     messageLoadStatus.value.loading.old = true;
     await updateMessages([...beforeMessages, ...afterMessages], false, true);
-    nextTick(() => {
-      // 滚动到上次阅读记录处
-      bubblesRef.value
-        .find((item) => {
-          return item.message._id === afterMessages[0]._id;
-        })
-        ?.bubble?.scrollIntoView();
-      messageLoadStatus.value.loading.old = false;
-    });
+    if (afterMessages.length) {
+      // 有未读消息，滚动到上次阅读记录处
+      nextTick(() => {
+        bubblesRef.value
+          .find((item) => {
+            return item.message._id === afterMessages[0]._id;
+          })
+          ?.bubble?.scrollIntoView();
+        messageLoadStatus.value.loading.old = false;
+      });
+    }
   } else {
     // 没有上次阅读记录，说明从未阅读过，直接从服务器从头开始获取消息
     const messages = await getMessages(
