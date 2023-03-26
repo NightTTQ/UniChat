@@ -131,9 +131,12 @@ const connect = async () => {
   try {
     // 使用roomToken进行连接
     if (callModalVars.value.callConfig.method === "qiniu") {
-      await callRef.value?.join(callModalVars.value.callConfig.roomToken);
-      callModalVars.value.status = 3;
+      await callRef.value?.join(
+        "qiniu",
+        callModalVars.value.callConfig.roomToken
+      );
     }
+    callModalVars.value.status = 3;
   } catch (error) {
     console.log(error);
 

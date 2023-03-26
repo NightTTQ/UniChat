@@ -35,142 +35,169 @@
       </n-popover>
     </div>
 
-    <div class="remote-track" ref="remoteRef"></div>
-    <div class="local-track" ref="localRef"></div>
+    <div class="remote-track">
+      <video
+        autoplay
+        ref="remoteVideoRef"
+        style="visibility: hidden; height: 100%; width: 100%"
+      ></video>
+      <audio autoplay ref="remoteAudioRef" style="visibility: hidden"></audio>
+    </div>
+    <div class="local-track">
+      <video
+        autoplay
+        ref="localVideoRef"
+        style="visibility: hidden; height: 100%; width: 100%"
+      ></video>
+      <audio autoplay ref="localAudioRef" style="visibility: hidden"></audio>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, nextTick } from "vue";
+import { ref } from "vue";
 import { Settings } from "@vicons/ionicons5";
-import QNRTC, {
-  QNTransportPolicy,
-  QNConnectionState,
-  QNConnectionDisconnectedReason,
-  type QNLocalTrack,
-  type QNLocalVideoTrack,
-  type QNLocalAudioTrack,
-  type QNRemoteTrack,
-  type QNRemoteVideoTrack,
-  type QNRemoteAudioTrack,
-  type QNRTCClient,
-} from "qnweb-rtc";
+
+import { SDKs, RTC, SupportRTCSDK } from "@/services/rtcService";
 
 const emits = defineEmits<{
   (event: "disconnected", reason: string): void;
 }>();
 
-const remoteRef = ref<HTMLElement>();
-const localRef = ref<HTMLElement>();
+const remoteVideoRef = ref<HTMLVideoElement>();
+const remoteAudioRef = ref<HTMLAudioElement>();
+const localVideoRef = ref<HTMLVideoElement>();
+const localAudioRef = ref<HTMLAudioElement>();
 const cameras = ref<MediaDeviceInfo[]>([]);
 const microphones = ref<MediaDeviceInfo[]>([]);
 const selectedCameraId = ref();
 const selectedMicrophoneId = ref();
 const useCamera = ref(false);
 const useMicrophone = ref(true);
-const localTracks = ref<{
-  videoTrack?: QNLocalVideoTrack | null;
-  audioTrack?: QNLocalAudioTrack | null;
-}>({ videoTrack: undefined, audioTrack: undefined });
 const switchingTracks = ref({ video: false, audio: false });
+let RTCMethod: SupportRTCSDK | null = null;
+let localVideoTrack: MediaStreamTrack | null = null;
+let localAudioTrack: MediaStreamTrack | null = null;
+let remoteVideoTrack: MediaStreamTrack | null = null;
+let remoteAudioTrack: MediaStreamTrack | null = null;
+/** @desc 当前面板激活状态，若进入关闭流程则应为false */
 let active = true;
 
-QNRTC.onCameraChanged = async () => {
-  cameras.value = await QNRTC.getCameras();
+// 刷新设备列表
+const refreshDevices = async () => {
+  const devices = await RTC.getInstance().getDevices();
+  cameras.value = devices.filter((d) => d.kind === "videoinput");
+  microphones.value = devices.filter((d) => d.kind === "audioinput");
 };
-QNRTC.onMicrophoneChanged = async () => {
-  microphones.value = await QNRTC.getMicrophones();
-};
-
-const client = QNRTC.createClient();
-QNRTC.setTransportPolicy(QNTransportPolicy.PREFER_UDP);
-// 订阅远端用户发布的音视频流
-const subscribe = async (client: QNRTCClient, tracks: QNRemoteTrack[]) => {
-  // 传入远端用户发布的音视频轨道执行订阅操作。
-  // 订阅成功后异步返回订阅成功的远端音视频轨道
-  const remoteTracks = await client.subscribe(tracks);
-  // 播放远端的音视频轨
-  renderRemoteTracks(remoteTracks);
-};
-// 自动订阅
-const autoSubscribe = (client: QNRTCClient) => {
-  // 监听远端用户发布的音视频流
-  client.on(
-    "user-published",
-    async (userId: string, tracks: QNRemoteTrack[]) => {
-      subscribe(client, tracks);
+// 渲染音视频流
+const renderTrack = (
+  type: "localVideo" | "localVoice" | "remoteVideo" | "remoteVoice",
+  isCancle = false
+) => {
+  if (type === "localVideo" && localVideoRef.value) {
+    if (!isCancle && localVideoTrack) {
+      // 渲染本地视频流
+      localVideoRef.value.srcObject = new MediaStream([localVideoTrack]);
+      localVideoRef.value.style.visibility = "visible";
+    } else {
+      // 取消渲染本地视频流
+      localVideoRef.value.srcObject = null;
+      localVideoRef.value.style.visibility = "hidden";
     }
-  );
-};
-/**
- * @desc 生成视频轨道
- */
-const genVideoTrack = async () => {
-  if (!active) return null;
-  return await QNRTC.createCameraVideoTrack({
-    cameraId: selectedCameraId.value,
-  });
-};
-/**
- * @desc 生成音频轨道
- */
-const genAudioTrack = async () => {
-  if (!active) return null;
-  return await QNRTC.createMicrophoneAudioTrack({
-    microphoneId: selectedMicrophoneId.value,
-  });
-};
-/**
- * @desc 渲染远端音视频轨道
- * @param tracks 远端音视频轨道
- */
-const renderRemoteTracks = (tracks: {
-  videoTracks: QNRemoteVideoTrack[];
-  audioTracks: QNRemoteAudioTrack[];
-}) => {
-  if (remoteRef.value) {
-    for (const remoteTrack of [...tracks.videoTracks, ...tracks.audioTracks]) {
-      remoteTrack.play(remoteRef.value);
+  }
+  if (type === "localVoice" && localAudioRef.value) {
+    if (!isCancle && localAudioTrack) {
+      // 渲染本地音频流
+      localAudioRef.value.srcObject = new MediaStream([localAudioTrack]);
+    } else {
+      // 取消渲染本地音频流
+      localAudioRef.value.srcObject = null;
+    }
+  }
+  if (type === "remoteVideo" && remoteVideoRef.value) {
+    if (!isCancle && remoteVideoTrack) {
+      // 渲染远端视频流
+      remoteVideoRef.value.srcObject = new MediaStream([remoteVideoTrack]);
+      remoteVideoRef.value.style.visibility = "visible";
+    } else {
+      // 取消渲染远端视频流
+      remoteVideoRef.value.srcObject = null;
+      remoteVideoRef.value.style.visibility = "hidden";
+    }
+  }
+  if (type === "remoteVoice" && remoteAudioRef.value) {
+    if (!isCancle && remoteAudioTrack) {
+      // 渲染远端音频流
+      remoteAudioRef.value.srcObject = new MediaStream([remoteAudioTrack]);
+    } else {
+      // 取消渲染远端音频流
+      remoteAudioRef.value.srcObject = null;
     }
   }
 };
-/**
- * @desc 渲染本地视频轨道
- */
-const renderLocalTracks = () => {
-  if (localRef.value) {
-    if (localTracks.value?.videoTrack)
-      localTracks.value.videoTrack.play(localRef.value);
-  }
-};
-
 /**
  * @desc 建立连接加入房间
  */
-const join = async (roomToken: string) => {
-  await client.join(roomToken);
+const join = async (method: string, roomToken: string) => {
+  // 根据协商结果选择连接方式
+  if (method === "qiniu") {
+    RTCMethod = new SDKs.qiniu();
+  }
+  // 建立连接
+  await RTCMethod?.join(roomToken);
   // 发布本地音视频轨道
-  if (useCamera.value && localTracks.value?.videoTrack) {
-    await client.publish(localTracks.value.videoTrack);
+  if (localVideoTrack) {
+    RTCMethod?.publishTracks([localVideoTrack]);
   }
-  if (useMicrophone.value && localTracks.value?.audioTrack) {
-    await client.publish(localTracks.value.audioTrack);
+  if (localAudioTrack) {
+    RTCMethod?.publishTracks([localAudioTrack]);
   }
+  // 订阅远端音视频轨道
+  RTCMethod?.subscribeTracks((tracks) => {
+    for (const track of tracks) {
+      if (track.kind === "video") {
+        remoteVideoTrack = track;
+        renderTrack("remoteVideo");
+      }
+      if (track.kind === "audio") {
+        remoteAudioTrack = track;
+        renderTrack("remoteVoice");
+      }
+    }
+  });
 };
 /**
  * @desc 断开连接离开房间
  */
 const leave = async () => {
   active = false;
-  if (client.roomName) {
-    if (localTracks.value?.videoTrack)
-      client.unpublish(localTracks.value.videoTrack);
-    if (localTracks.value?.audioTrack)
-      client.unpublish(localTracks.value.audioTrack);
-    client.leave();
+  // 取消发布并销毁本地音视频轨道
+  if (localVideoTrack) {
+    await RTCMethod?.unpublishTracks([localVideoTrack]);
+    localVideoTrack.stop();
+    localVideoTrack = null;
   }
-
-  if (localTracks.value?.videoTrack) localTracks.value.videoTrack.destroy();
-  if (localTracks.value?.audioTrack) localTracks.value.audioTrack.destroy();
+  if (localAudioTrack) {
+    await RTCMethod?.unpublishTracks([localAudioTrack]);
+    localAudioTrack.stop();
+    localAudioTrack = null;
+  }
+  // 重置本地音视频渲染元素状态
+  renderTrack("localVideo", true);
+  renderTrack("localVoice", true);
+  // 销毁远端音视频轨道
+  if (remoteVideoTrack) {
+    remoteVideoTrack.stop();
+    remoteVideoTrack = null;
+  }
+  if (remoteAudioTrack) {
+    remoteAudioTrack.stop();
+    remoteAudioTrack = null;
+  }
+  // 重置远端音视频渲染元素状态
+  renderTrack("remoteVideo", true);
+  renderTrack("remoteVoice", true);
+  // 断开连接
+  await RTCMethod?.leave();
 };
 /**
  * @desc 开关摄像头
@@ -183,20 +210,25 @@ const toggleCamera = async (enable: boolean) => {
       selectedCameraId.value = cameras.value[0].deviceId;
     }
     useCamera.value = true;
-    localTracks.value.videoTrack = await genVideoTrack();
-    if (client.roomName && localTracks.value.videoTrack) {
-      await client.publish(localTracks.value.videoTrack);
-    }
-    renderLocalTracks();
+    // 创建本地视频流
+    localVideoTrack = await RTC.getInstance().genVideoTrack(
+      selectedCameraId.value
+    );
+    // 发布本地视频流
+    RTCMethod?.publishTracks([localVideoTrack]);
+    // 渲染本地视频预览
+    renderTrack("localVideo");
   } else {
     // 关闭摄像头
     useCamera.value = false;
-    if (client.roomName && localTracks.value?.videoTrack) {
-      client.unpublish(localTracks.value.videoTrack);
-    }
-    if (localTracks.value?.videoTrack) {
-      localTracks.value.videoTrack.destroy();
-      localTracks.value.videoTrack = undefined;
+    // 取消发布本地视频流
+    if (localVideoTrack) RTCMethod?.unpublishTracks([localVideoTrack]);
+    // 关闭本地视频渲染
+    renderTrack("localVideo", true);
+    // 销毁本地视频流
+    if (localVideoTrack) {
+      localVideoTrack.stop();
+      localVideoTrack = null;
     }
   }
   switchingTracks.value.video = false;
@@ -207,22 +239,22 @@ const toggleCamera = async (enable: boolean) => {
 const switchCamera = async (value: string) => {
   switchingTracks.value.video = true;
   selectedCameraId.value = value;
-  // 如果已经发布了视频轨道，先取消发布
-  if (client.roomName && localTracks.value?.videoTrack) {
-    client.unpublish(localTracks.value.videoTrack);
-  }
+  // 取消发布本地视频流
+  if (localVideoTrack) RTCMethod?.unpublishTracks([localVideoTrack]);
   // 销毁本地视频轨道
-  if (localTracks.value?.videoTrack) {
-    localTracks.value.videoTrack.destroy();
-    localTracks.value.videoTrack = undefined;
+  if (localVideoTrack) {
+    localVideoTrack.stop();
+    localVideoTrack = null;
   }
-  // 只有开启了摄像头才生成本地轨道并渲染
   if (useCamera.value) {
-    localTracks.value.videoTrack = await genVideoTrack();
-    renderLocalTracks();
-  }
-  if (client.roomName && localTracks.value.videoTrack) {
-    await client.publish(localTracks.value.videoTrack);
+    // 若开启了摄像头则生成本地轨道
+    localVideoTrack = await RTC.getInstance().genVideoTrack(
+      selectedCameraId.value
+    );
+    // 再渲染本地轨道
+    renderTrack("localVideo");
+    // 发布本地视频流
+    RTCMethod?.publishTracks([localVideoTrack]);
   }
   switchingTracks.value.video = false;
 };
@@ -237,19 +269,21 @@ const toggleMicrophone = async (enable: boolean) => {
       selectedMicrophoneId.value = microphones.value[0].deviceId;
     }
     useMicrophone.value = true;
-    localTracks.value.audioTrack = await genAudioTrack();
-    if (client.roomName && localTracks.value.audioTrack) {
-      await client.publish(localTracks.value.audioTrack);
-    }
+    // 创建本地音频流
+    localAudioTrack = await RTC.getInstance().genAudioTrack(
+      selectedMicrophoneId.value
+    );
+    // 发布本地音频流
+    RTCMethod?.publishTracks([localAudioTrack]);
   } else {
     // 关闭麦克风
     useMicrophone.value = false;
-    if (client.roomName && localTracks.value?.audioTrack) {
-      client.unpublish(localTracks.value.audioTrack);
-    }
-    if (localTracks.value?.audioTrack) {
-      localTracks.value.audioTrack.destroy();
-      localTracks.value.audioTrack = undefined;
+    // 取消发布本地音频流
+    if (localAudioTrack) RTCMethod?.unpublishTracks([localAudioTrack]);
+    // 销毁本地音频流
+    if (localAudioTrack) {
+      localAudioTrack.stop();
+      localAudioTrack = null;
     }
   }
   switchingTracks.value.audio = false;
@@ -260,44 +294,24 @@ const toggleMicrophone = async (enable: boolean) => {
 const switchMicrophone = async (value: string) => {
   switchingTracks.value.audio = true;
   selectedMicrophoneId.value = value;
-  // 如果已经发布了音频轨道，先取消发布
-  if (client.roomName && localTracks.value?.audioTrack) {
-    client.unpublish(localTracks.value.audioTrack);
-  }
-  if (localTracks.value?.audioTrack) {
-    localTracks.value.audioTrack.destroy();
-    localTracks.value.audioTrack = undefined;
-  }
-  // 只有开启了麦克风才生成本地轨道
-  if (useMicrophone.value) localTracks.value.audioTrack = await genAudioTrack();
-  if (client.roomName && localTracks.value.audioTrack) {
-    await client.publish(localTracks.value.audioTrack);
+  // 取消发布音频流
+  if (localAudioTrack) RTCMethod?.unpublishTracks([localAudioTrack]);
+  if (useMicrophone.value) {
+    // 若开启了麦克风则生成本地音频流
+    localAudioTrack = await RTC.getInstance().genAudioTrack(
+      selectedMicrophoneId.value
+    );
+    // 再发布本地音频流
+    RTCMethod?.publishTracks([localAudioTrack]);
   }
   switchingTracks.value.audio = false;
 };
 
 const init = async (camera = false, silence = false) => {
   active = true;
-  autoSubscribe(client);
-  // 监听连接状态变化
-  client.on("connection-state-changed", (state: string, info: any) => {
-    if (
-      state === QNConnectionState.DISCONNECTED &&
-      info.reason === QNConnectionDisconnectedReason.ERROR
-    ) {
-      emits("disconnected", "连接错误");
-    }
-  });
-  // 监听远端用户取消发布的音视频流
-  client.on(
-    "user-unpublished",
-    async (userId: string, track: QNRemoteTrack) => {
-      // 取消订阅
-      await client.unsubscribe(track);
-    }
-  );
-  cameras.value = await QNRTC.getCameras();
-  microphones.value = await QNRTC.getMicrophones();
+  // 当设备列表发生变化时刷新设备列表
+  navigator.mediaDevices.ondevicechange = refreshDevices;
+  await refreshDevices();
   if (camera === true) toggleCamera(true);
   if (silence === false) toggleMicrophone(true);
 };
