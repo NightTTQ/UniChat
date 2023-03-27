@@ -12,19 +12,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { PersonAddOutline } from "@vicons/ionicons5";
-const toRequest = () => {};
 </script>
 
 <style lang="scss" scoped>
 .wrapper {
-  //background-color: rgb(24,24,28);
-  padding: 0 1em;
+  background-color: rgba($color: #fff, $alpha: 0.05);
+  padding: 0 2em;
   height: 7em;
   display: flex;
+  flex-direction: row;
   justify-content: left;
   cursor: pointer;
+  overflow: hidden;
   .img-area {
     display: flex;
     align-items: center;
@@ -42,6 +42,7 @@ const toRequest = () => {};
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
     .text {
       font-size: 1.4em;
       margin: 0;
