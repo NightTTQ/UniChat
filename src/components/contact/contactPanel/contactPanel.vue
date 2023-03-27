@@ -1,9 +1,9 @@
 <template>
-  <n-layout style="height: 100vh;width:70%">
+  <n-layout style="height: 100vh; width: 70%">
     <n-layout-content content-style="padding: 50px">
       <n-space vertical>
-        <friendInfo v-if="panelInfo.type == 'friend'" :panelInfo="panelInfo"/>
-        <groupInfo v-else :panelInfo="panelInfo"/>
+        <friendInfo v-if="panelInfo.type == 'friend'" :panelInfo="panelInfo" />
+        <groupInfo v-else :panelInfo="panelInfo" />
       </n-space>
     </n-layout-content>
   </n-layout>
@@ -12,11 +12,14 @@
 <script setup lang="ts">
 import { Info } from "./type";
 import { watch, ref } from "vue";
+import { storeToRefs } from "pinia";
+import { useContactsStore, useGroupsStore } from "@/stores";
 
-import { storeToRefs } from 'pinia';
-import { useCurrentContactStore, useContactsStore, useGroupsStore } from '@/stores';
+const props = defineProps<{
+  _id: string;
+}>();
 
-const _id = storeToRefs(useCurrentContactStore())._id;
+let _id = ref(props._id);
 const contacts = storeToRefs(useContactsStore()).contacts;
 const groups = storeToRefs(useGroupsStore()).groups;
 
@@ -26,15 +29,18 @@ const formatPanelInfo = (_id: string): Info => {
   const detailInfo = groups.value[_id] || contacts.value[_id];
   return {
     type,
-    ...detailInfo
-  }
-}
+    ...detailInfo,
+  };
+};
 
 let panelInfo = ref(formatPanelInfo(_id.value));
 // 点击事件发生时，改变 panel
-watch(_id, (newId) => {
-  panelInfo.value = formatPanelInfo(newId);
-})
+watch(
+  () => props._id,
+  (newId) => {
+    panelInfo.value = formatPanelInfo(newId);
+  }
+);
 </script>
 
 <style scoped></style>

@@ -223,19 +223,6 @@ const useGlobalStore = defineStore({
   },
 });
 
-// 当前联系人面板信息
-const useCurrentContactStore = defineStore({
-  id: "currentContact",
-  state: () => ({
-    _id: "",
-  }),
-  actions: {
-    toggleId(_id: string) {
-      this._id = _id;
-    },
-  },
-});
-
 export {
   useUserStore,
   useContactsStore,
@@ -243,5 +230,4 @@ export {
   useChatsStore,
   useUsersStore,
   useGlobalStore,
-  useCurrentContactStore,
 };

@@ -45,13 +45,13 @@ const router = createRouter({
               path: "friend",
               name: "friend",
               component: () =>
-                import("@/components/contact/contactList/friendList.vue"),
+                import("@/components/contact/contactList/contactList.vue"),
             },
             {
               path: "group",
               name: "group",
               component: () =>
-                import("@/components/contact/contactList/groupList.vue"),
+                import("@/components/contact/contactList/contactList.vue"),
             },
           ],
         },
