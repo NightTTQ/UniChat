@@ -1,11 +1,9 @@
 <template>
-  <n-popover trigger="click" placement="top-start" :show-arrow="false">
+  <n-popover trigger="click" placement="left-end" :show-arrow="false">
     <template #trigger>
-      <div class="icon">
-        <n-icon size="24" class="icon">
-          <Menu />
-        </n-icon>
-      </div>
+      <n-icon size="24" class="icon">
+        <Menu />
+      </n-icon>
     </template>
     <div class="more-wrapper">
       <div class="logout">
@@ -16,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { Menu } from "@vicons/ionicons5";
 
 import router from "@/router";
@@ -27,6 +24,12 @@ const handleLogout = () => {
 </script>
 
 <style scoped lang="scss">
+.icon {
+  cursor: pointer;
+  &:hover {
+    color: var(--primary-color);
+  }
+}
 .more-wrapper {
   display: flex;
   flex-direction: column;

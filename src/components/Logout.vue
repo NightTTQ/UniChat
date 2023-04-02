@@ -56,7 +56,6 @@ const doLogout = async () => {
   userStore.$reset();
   chatsStore.$reset();
   usersStore.$reset();
-  globalStore.$reset();
   contactsStore.$reset();
   groupsStore.$reset();
   router.push({ name: "login" });

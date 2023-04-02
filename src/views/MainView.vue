@@ -137,7 +137,6 @@ onBeforeMount(async () => {
   // 数据初始化
   if (!userStore.sessionID) {
     // session不存在，认为未登录跳到介绍页
-    notification.error({ content: "请先登录", duration: 3000 });
     router.push({ name: "home" });
     return null;
   } else {

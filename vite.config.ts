@@ -7,6 +7,7 @@ import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  publicDir: "public",
   plugins: [
     vue(),
     AutoImport({ resolvers: [NaiveUiResolver()] }),
@@ -23,6 +24,8 @@ export default defineConfig({
     },
   },
   server: {
+    port: 5173,
+    open: true,
     proxy: {
       "/api": {
         target: "http://localhost:3000",
@@ -40,4 +43,13 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    target: "modules",
+    outDir: "dist",
+    assetsDir: "assets",
+    assetsInlineLimit: 4096,
+    minify: "esbuild",
+    sourcemap: true,
+  },
+  appType: "spa",
 });
