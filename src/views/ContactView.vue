@@ -4,8 +4,8 @@
       @toggleId="toggleId"
       @toShowRequest="toShowRequest"
     ></ContactList>
-    <ContactPanel v-show="!isShow" :_id="PanelItemID"></ContactPanel>
-    <RequestList v-show="isShow"></RequestList>
+    <ContactPanel v-show="show === 'contact'" :_id="PanelItemID"></ContactPanel>
+    <RequestList v-show="show === 'requst'"></RequestList>
   </n-layout>
 </template>
 <script setup lang="ts">
@@ -16,18 +16,18 @@ import { ContactPanel } from "@/components/contact/contactPanel";
 import RequestList from "@/components/contact/contactRequest/requestList.vue";
 import { Contact, Group } from "@/types";
 
-let isShow = ref(true);
-let PanelItemID = ref("");
+const show = ref<"contact" | "requst">();
+const PanelItemID = ref("");
 
 // 切换item
 const toggleId = (item: Contact | Group) => {
   PanelItemID.value = item._id;
-  isShow.value = false;
+  show.value = "contact";
 };
 
 // 显示好友/群聊请求列表
 const toShowRequest = () => {
-  isShow.value = true;
+  show.value = "requst";
 };
 </script>
 <style scoped lang="scss">
